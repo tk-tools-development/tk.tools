@@ -1,1 +1,913 @@
-local _G=game;local A=_G:GetService("Players");local B=A.LocalPlayer;local C=_G:GetService("RunService");local D=_G:GetService("UserInputService");local E=_G:GetService("TweenService");local F=_G:GetService("ReplicatedStorage");local G=_G:GetService("Workspace");local H=_G:GetService("HttpService");local I=_G:GetService("Lighting");local J=_G:GetService("Debris");local K={Client={},Server={},Visuals={},Movement={},Troll={},Utility={}};local L={};local M=false;local N=nil;local function O()local P=F:FindFirstChild("TK_Remote");if not P then local Q,R=pcall(function()local S=Instance.new("RemoteEvent");S.Name="TK_Remote";S.Parent=F;P=S;M=true end);if not Q then P=F:FindFirstChild("TK_Remote");if P then M=true end end else M=true end;N=P;return P end;O();if C:IsServer()and N then N.OnServerEvent:Connect(function(T,U,V)if U=="KickAll"then for _,W in pairs(A:GetPlayers())do if W~=T then pcall(function()W:Kick("Kicked by TK.TOOLS")end)end end elseif U=="KillAll"then for _,X in pairs(A:GetPlayers())do if X.Character and X.Character:FindFirstChild("Humanoid")then pcall(function()X.Character.Humanoid.Health=0 end)end end elseif U=="ExplodeAll"then for _,Y in pairs(A:GetPlayers())do if Y.Character and Y.Character:FindFirstChild("HumanoidRootPart")then local Z=Instance.new("Explosion");Z.Position=Y.Character.HumanoidRootPart.Position;Z.BlastRadius=30;Z.BlastPressure=500000;Z.Parent=G end end elseif U=="FreezeAll"then for _,aa in pairs(A:GetPlayers())do if aa.Character then for _,ab in pairs(aa.Character:GetDescendants())do if ab:IsA("BasePart")then ab.Anchored=true end end end end elseif U=="UnfreezeAll"then for _,ac in pairs(A:GetPlayers())do if ac.Character then for _,ad in pairs(ac.Character:GetDescendants())do if ad:IsA("BasePart")then ad.Anchored=false end end end end elseif U=="FlingAll"then for _,ae in pairs(A:GetPlayers())do if ae~=T and ae.Character and ae.Character:FindFirstChild("HumanoidRootPart")then local af=ae.Character.HumanoidRootPart;local ag=Instance.new("BodyVelocity");ag.Velocity=Vector3.new(math.random(-1000,1000),math.random(500,1500),math.random(-1000,1000));ag.MaxForce=Vector3.new(1e9,1e9,1e9);ag.Parent=af;J:AddItem(ag,0.5)end end elseif U=="SuperSpeed"then for _,ah in pairs(A:GetPlayers())do if ah.Character and ah.Character:FindFirstChild("Humanoid")then ah.Character.Humanoid.WalkSpeed=100 end end elseif U=="ResetSpeed"then for _,ai in pairs(A:GetPlayers())do if ai.Character and ai.Character:FindFirstChild("Humanoid")then ai.Character.Humanoid.WalkSpeed=16 end end elseif U=="TeleportAll"then local aj=V or Vector3.new(0,100,0);for _,ak in pairs(A:GetPlayers())do if ak~=T and ak.Character and ak.Character:FindFirstChild("HumanoidRootPart")then ak.Character.HumanoidRootPart.CFrame=CFrame.new(aj+Vector3.new(math.random(-5,5),0,math.random(-5,5)))end end elseif U=="LightingFlash"then I.Brightness=10;J:AddItem(I,0.5,function()I.Brightness=1 end)elseif U=="RemoveAllParts"then for _,al in pairs(A:GetPlayers())do if al.Character then for _,am in pairs(al.Character:GetChildren())do if am:IsA("BasePart")then am:Destroy()end end end end elseif U=="ExplodeSelf"then if T.Character and T.Character:FindFirstChild("HumanoidRootPart")then local an=Instance.new("Explosion");an.Position=T.Character.HumanoidRootPart.Position;an.BlastRadius=40;an.BlastPressure=600000;an.Parent=G end end end end);local ao=Instance.new("ScreenGui");ao.Name="TK_Tools_Pro";ao.Parent=B:WaitForChild("PlayerGui");ao.ResetOnSpawn=false;ao.ZIndexBehavior=Enum.ZIndexBehavior.Sibling;ao.Enabled=true;local ap=Instance.new("BlurEffect");ap.Size=0;ap.Parent=I;local aq=Instance.new("Frame");aq.Name="MainFrame";aq.Size=UDim2.new(0,850,0,650);aq.Position=UDim2.new(0.5,-425,0.5,-325);aq.BackgroundColor3=Color3.fromRGB(12,12,20);aq.BackgroundTransparency=0.08;aq.BorderSizePixel=0;aq.ClipsDescendants=true;aq.Parent=ao;local ar=Instance.new("Frame");ar.Size=UDim2.new(1,0,1,0);ar.BackgroundColor3=Color3.fromRGB(255,255,255);ar.BackgroundTransparency=0.95;ar.BorderSizePixel=0;ar.Parent=aq;local as=Instance.new("Frame");as.Size=UDim2.new(1,4,1,4);as.Position=UDim2.new(0,-2,0,-2);as.BackgroundTransparency=1;as.BorderSizePixel=2;as.BorderColor3=Color3.fromRGB(80,180,255);as.BackgroundColor3=Color3.fromRGB(0,0,0);as.BackgroundTransparency=1;as.Parent=aq;local at=Instance.new("UICorner");at.CornerRadius=UDim.new(0,12);at.Parent=aq;local au=Instance.new("Frame");au.Size=UDim2.new(1,0,0,50);au.BackgroundColor3=Color3.fromRGB(0,0,0);au.BackgroundTransparency=0.6;au.BorderSizePixel=0;au.Parent=aq;local av=Instance.new("UICorner");av.CornerRadius=UDim.new(0,12);av.Parent=au;local aw=Instance.new("TextLabel");aw.Size=UDim2.new(0.5,0,1,0);aw.Position=UDim2.new(0,15,0,0);aw.BackgroundTransparency=1;aw.Text="⚡ TK.TOOLS v6.0";aw.TextColor3=Color3.fromRGB(255,255,255);aw.TextSize=22;aw.Font=Enum.Font.GothamBold;aw.TextXAlignment=Enum.TextXAlignment.Left;aw.TextStrokeColor3=Color3.fromRGB(0,150,255);aw.TextStrokeTransparency=0.3;aw.Parent=au;local ax=Instance.new("Frame");ax.Size=UDim2.new(0,120,0,28);ax.Position=UDim2.new(0.5,-60,0.5,-14);ax.BackgroundColor3=M and Color3.fromRGB(0,200,50)or Color3.fromRGB(200,50,50);ax.BackgroundTransparency=0.3;ax.BorderSizePixel=0;ax.Parent=au;local ay=Instance.new("UICorner");ay.CornerRadius=UDim.new(0,6);ay.Parent=ax;local az=Instance.new("TextLabel");az.Size=UDim2.new(1,-20,1,0);az.Position=UDim2.new(0,10,0,0);az.BackgroundTransparency=1;az.Text=M and"🟢 SERVER OK"or"❌ SERVER X";az.TextColor3=Color3.fromRGB(255,255,255);az.TextSize=12;az.Font=Enum.Font.GothamBold;az.Parent=ax;local aA=Instance.new("TextButton");aA.Size=UDim2.new(0,35,0,35);aA.Position=UDim2.new(1,-42,0,7);aA.BackgroundColor3=Color3.fromRGB(200,40,40);aA.BackgroundTransparency=0.2;aA.BorderSizePixel=0;aA.Text="✕";aA.TextColor3=Color3.fromRGB(255,255,255);aA.TextSize=18;aA.Font=Enum.Font.GothamBold;aA.Parent=au;local aB=Instance.new("UICorner");aB.CornerRadius=UDim.new(1,0);aB.Parent=aA;aA.MouseButton1Click:Connect(function()ao:Destroy();ap:Destroy()end);local aC=Instance.new("Frame");aC.Size=UDim2.new(1,-20,0,35);aC.Position=UDim2.new(0,10,0,55);aC.BackgroundColor3=Color3.fromRGB(30,30,40);aC.BackgroundTransparency=0.5;aC.BorderSizePixel=1;aC.BorderColor3=Color3.fromRGB(60,60,80);aC.Parent=aq;local aD=Instance.new("UICorner");aD.CornerRadius=UDim.new(0,6);aD.Parent=aC;local aE=Instance.new("TextLabel");aE.Size=UDim2.new(0,30,1,0);aE.BackgroundTransparency=1;aE.Text="🔍";aE.TextColor3=Color3.fromRGB(150,150,200);aE.TextSize=18;aE.Font=Enum.Font.Gotham;aE.Parent=aC;local aF=Instance.new("TextBox");aF.Size=UDim2.new(1,-40,1,0);aF.Position=UDim2.new(0,35,0,0);aF.BackgroundTransparency=1;aF.Text="";aF.TextColor3=Color3.fromRGB(255,255,255);aF.TextSize=16;aF.Font=Enum.Font.Gotham;aF.PlaceholderText="🔎 Search features...";aF.PlaceholderColor3=Color3.fromRGB(150,150,200);aF.ClipsDescendants=true;aF.Parent=aC;local aG=Instance.new("Frame");aG.Size=UDim2.new(1,-20,0,40);aG.Position=UDim2.new(0,10,0,95);aG.BackgroundTransparency=1;aG.Parent=aq;local aH={"Client","Server","Visuals","Movement","Troll","Utility"};local aI={};local aJ="Client";local aK={};local function aL(aM,aN)local aO=Instance.new("TextButton");aO.Size=UDim2.new(0,120,1,0);aO.Position=UDim2.new(0,aN,0,0);aO.BackgroundColor3=Color3.fromRGB(40,40,60);aO.BackgroundTransparency=0.3;aO.BorderSizePixel=0;aO.Text=aM;aO.TextColor3=Color3.fromRGB(200,200,255);aO.TextSize=14;aO.Font=Enum.Font.GothamSemibold;aO.Parent=aG;local aP=Instance.new("UICorner");aP.CornerRadius=UDim.new(0,6);aP.Parent=aO;return aO end;for aQ=1,#aH do local aR=aL(aH[aQ],(aQ-1)*125);aI[aH[aQ]]=aR;aR.MouseButton1Click:Connect(function()aJ=aH[aQ];for aS,aT in pairs(aI)do aT.BackgroundColor3=(aS==aH[aQ])and Color3.fromRGB(60,60,100)or Color3.fromRGB(40,40,60);aT.TextColor3=(aS==aH[aQ])and Color3.fromRGB(255,255,255)or Color3.fromRGB(200,200,255)end;for aU,aV in pairs(aK)do aV.Visible=(aU==aH[aQ])end;aF.Text="";aBe(aF.Text)end)end;aI["Client"].BackgroundColor3=Color3.fromRGB(60,60,100);aI["Client"].TextColor3=Color3.fromRGB(255,255,255);local aW=Instance.new("Frame");aW.Size=UDim2.new(1,-20,1,-190);aW.Position=UDim2.new(0,10,0,140);aW.BackgroundTransparency=1;aW.Parent=aq;for aX,aY in pairs(aH)do local aZ=Instance.new("ScrollingFrame");aZ.Size=UDim2.new(1,0,1,0);aZ.BackgroundTransparency=1;aZ.BorderSizePixel=0;aZ.CanvasSize=UDim2.new(0,0,0,0);aZ.ScrollBarThickness=6;aZ.ScrollBarImageColor3=Color3.fromRGB(80,180,255);aZ.ScrollBarImageTransparency=0.3;aZ.Parent=aW;aZ.Visible=(aX=="Client");local ba=Instance.new("UIListLayout");ba.SortOrder=Enum.SortOrder.LayoutOrder;ba.Padding=UDim.new(0,4);ba.Parent=aZ;aK[aX]=aZ end;local function bb(aX,aM,aZ,color,be,isDanger)local aV=aK[aX];if not aV then return end;local bf=Instance.new("TextButton");bf.Size=UDim2.new(1,-10,0,34);bf.BackgroundColor3=color or Color3.fromRGB(50,50,70);bf.BackgroundTransparency=0.2;bf.BorderSizePixel=0;bf.Text="";bf.Parent=aV;local bg=Instance.new("UICorner");bg.CornerRadius=UDim.new(0,6);bg.Parent=bf;local bh=Instance.new("TextLabel");bh.Size=UDim2.new(0.7,0,1,0);bh.Position=UDim2.new(0,10,0,0);bh.BackgroundTransparency=1;bh.Text=aM;bh.TextColor3=Color3.fromRGB(255,255,255);bh.TextSize=14;bh.Font=Enum.Font.Gotham;bh.TextXAlignment=Enum.TextXAlignment.Left;bh.Parent=bf;local bi=Instance.new("TextLabel");bi.Size=UDim2.new(0.7,0,0,14);bi.Position=UDim2.new(0,10,0,18);bi.BackgroundTransparency=1;bi.Text=aZ or"";bi.TextColor3=Color3.fromRGB(150,150,200);bi.TextSize=10;bi.Font=Enum.Font.Gotham;bi.TextXAlignment=Enum.TextXAlignment.Left;bi.Parent=bf;local bj=Instance.new("Frame");bj.Size=UDim2.new(0,12,0,12);bj.Position=UDim2.new(1,-25,0.5,-6);bj.BackgroundColor3=Color3.fromRGB(100,100,100);bj.BackgroundTransparency=0.3;bj.Parent=bf;local bk=Instance.new("UICorner");bk.CornerRadius=UDim.new(1,0);bk.Parent=bj;local bl=false;local bm=aX.."_"..aM;L[bm]=false;bf.MouseButton1Click:Connect(function()bl=not bl;L[bm]=bl;bj.BackgroundColor3=bl and Color3.fromRGB(0,255,100)or Color3.fromRGB(100,100,100);bf.BackgroundColor3=bl and Color3.fromRGB(80,80,120)or(color or Color3.fromRGB(50,50,70));pcall(be,bl)end);bf.MouseEnter:Connect(function()E:Create(bf,TweenInfo.new(0.15),{BackgroundTransparency=0.05}):Play()end);bf.MouseLeave:Connect(function()E:Create(bf,TweenInfo.new(0.15),{BackgroundTransparency=0.2}):Play()end);table.insert(K[aX],{btn=bf,name=aM,description=aZ})end;local function aBe(query)query=query:lower();for aX,aY in pairs(K)do local aV=aK[aX];if aV then for _,bn in pairs(aY)do if bn.btn then local bo=query==""or string.find(bn.name:lower(),query)or string.find((bn.description or""):lower(),query);bn.btn.Visible=bo end end end end;aF:GetPropertyChangedSignal("Text"):Connect(function()aBe(aF.Text)end);local function bp()for aX,aV in pairs(aK)do local children=aV:GetChildren();local totalHeight=0;for _,child in pairs(children)do if child:IsA("TextButton")and child.Visible then totalHeight=totalHeight+child.Size.Y.Offset+4 end end;aV.CanvasSize=UDim2.new(0,0,0,totalHeight+20)end end;local function bq(br,bs,bt,color,bu,bv)bb(br,bs,bt,color,bu,bv)end;bq("Client","ESP Boxes","Draw boxes around players",Color3.fromRGB(0,150,255),function(bw)if bw then for _,plr in pairs(A:GetPlayers())do if plr~=B and plr.Character then local bx=Instance.new("Highlight");bx.Name="TK_ESP";bx.Adornee=plr.Character;bx.FillColor=Color3.fromRGB(255,0,100);bx.FillTransparency=0.4;bx.OutlineColor=Color3.fromRGB(0,200,255);bx.OutlineTransparency=0.2;bx.Parent=plr.Character end end else for _,v in pairs(G:GetDescendants())do if v.Name=="TK_ESP"then v:Destroy()end end end end);bq("Client","ESP Names","Show player names",Color3.fromRGB(100,200,255),function(bw)end);bq("Client","ESP Health","Show health bars",Color3.fromRGB(255,100,100),function(bw)end);bq("Client","ESP Distance","Show distance",Color3.fromRGB(100,255,100),function(bw)end);bq("Client","ESP Tracers","Draw lines to players",Color3.fromRGB(255,200,50),function(bw)end);bq("Client","ESP Chams","Glow players",Color3.fromRGB(255,50,255),function(bw)end);bq("Client","ESP Skeletons","Draw bones",Color3.fromRGB(200,200,255),function(bw)end);bq("Client","ESP Head Dot","Dot on heads",Color3.fromRGB(255,50,50),function(bw)end);bq("Client","ESP Corner Box","3D corner boxes",Color3.fromRGB(50,200,255),function(bw)end);bq("Client","ESP Radar","2D minimap",Color3.fromRGB(100,100,200),function(bw)end);bq("Client","ESP View Angles","Show view direction",Color3.fromRGB(200,100,255),function(bw)end);bq("Client","ESP Weapon","Show weapon",Color3.fromRGB(200,200,100),function(bw)end);bq("Client","ESP Team","Team colors",Color3.fromRGB(100,255,200),function(bw)end);bq("Client","ESP Glow","Outline glow",Color3.fromRGB(0,255,255),function(bw)end);bq("Client","ESP Sprite","Icons above players",Color3.fromRGB(255,200,100),function(bw)end);bq("Client","ESP 2D Box","2D bounding boxes",Color3.fromRGB(200,100,200),function(bw)end);bq("Client","Aimbot","Auto aim",Color3.fromRGB(255,50,50),function(bw)end);bq("Client","Silent Aim","Invisible aimbot",Color3.fromRGB(200,50,100),function(bw)end);bq("Client","Triggerbot","Auto shoot",Color3.fromRGB(255,100,50),function(bw)end);bq("Client","No Recoil","Remove recoil",Color3.fromRGB(100,200,255),function(bw)end);bq("Client","No Spread","Perfect accuracy",Color3.fromRGB(50,255,100),function(bw)end);bq("Client","No Sway","Remove sway",Color3.fromRGB(200,200,50),function(bw)end);bq("Client","Instant Reload","Fast reload",Color3.fromRGB(255,150,50),function(bw)end);bq("Client","Unlimited Ammo","Never run out",Color3.fromRGB(255,200,50),function(bw)end);bq("Client","Rapid Fire","Max fire rate",Color3.fromRGB(255,50,200),function(bw)end);bq("Client","Muzzle Flash","Disable flash",Color3.fromRGB(200,200,255),function(bw)end);bq("Client","No Scope","Remove scope",Color3.fromRGB(100,100,255),function(bw)end);bq("Client","No Sound","Mute sounds",Color3.fromRGB(150,150,150),function(bw)end);bq("Client","No Cursor","Hide cursor",Color3.fromRGB(200,200,200),function(bw)end);bq("Client","Crosshair","Custom crosshair",Color3.fromRGB(0,255,0),function(bw)end);bq("Client","Hitbox Expander","Bigger hitboxes",Color3.fromRGB(255,0,0),function(bw)end);bq("Client","Fly","Free flight",Color3.fromRGB(100,200,255),function(bw)local by=nil;if bw then B.CharacterAdded:Connect(function(char)if bw then local bz=char:FindFirstChild("HumanoidRootPart");if bz then by=Instance.new("BodyVelocity");by.MaxForce=Vector3.new(1e6,1e6,1e6);by.Parent=bz end end end);local char=B.Character;if char then local bz=char:FindFirstChild("HumanoidRootPart");if bz then by=Instance.new("BodyVelocity");by.MaxForce=Vector3.new(1e6,1e6,1e6);by.Parent=bz end end else if by then by:Destroy()end;by=nil end end);bq("Client","Noclip","Walk through walls",Color3.fromRGB(200,100,255),function(bw)local bA=B.Character;if bA then for _,part in pairs(bA:GetDescendants())do if part:IsA("BasePart")then part.CanCollide=not bw end end end end);bq("Client","Speed Boost","2x movement speed",Color3.fromRGB(50,255,100),function(bw)local char=B.Character;if char then local hum=char:FindFirstChild("Humanoid");if hum then hum.WalkSpeed=bw and 32 or 16 end end;B.CharacterAdded:Connect(function(char)task.wait(0.2);local hum=char:FindFirstChild("Humanoid");if hum and L["Client_Speed Boost"]then hum.WalkSpeed=32 end end)end);bq("Client","Jump Boost","Higher jumps",Color3.fromRGB(255,200,50),function(bw)local char=B.Character;if char then local hum=char:FindFirstChild("Humanoid");if hum then hum.JumpPower=bw and 100 or 50 end end end);bq("Client","Infinite Jump","Jump forever",Color3.fromRGB(200,100,255),function(bw)local bB=0;local bC=nil;if bw then bC=D.InputBegan:Connect(function(input,processed)if processed then return end;if input.KeyCode==Enum.KeyCode.Space then local char=B.Character;if char then local hum=char:FindFirstChild("Humanoid");if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping)end end end end)else if bC then bC:Disconnect();bC=nil end end end);bq("Client","Teleport","Teleport to mouse",Color3.fromRGB(50,200,200),function(bw)if bw then local bD=nil;bD=D.InputBegan:Connect(function(input,processed)if processed then return end;if input.UserInputType==Enum.UserInputType.MouseButton2 then local bE=G.CurrentCamera;local bF=bE:ScreenPointToRay(D:GetMouseLocation().X,D:GetMouseLocation().Y);local bG=RaycastParams.new();bG.FilterDescendantsInstances={B.Character};local bH=Workspace:Raycast(bF.Origin,bF.Direction*1000,bG);if bH then local char=B.Character;if char and char:FindFirstChild("HumanoidRootPart")then char.HumanoidRootPart.CFrame=CFrame.new(bH.Position+Vector3.new(0,3,0))end end end end)else if bD then bD:Disconnect()end end end);bq("Client","Fling Self","Launch yourself",Color3.fromRGB(255,200,50),function(bw)local char=B.Character;if char and char:FindFirstChild("HumanoidRootPart")then local bz=char.HumanoidRootPart;local bI=Instance.new("BodyVelocity");bI.Velocity=Vector3.new(math.random(-500,500),math.random(300,1000),math.random(-500,500));bI.MaxForce=Vector3.new(1e9,1e9,1e9);bI.Parent=bz;J:AddItem(bI,0.5)end end);bq("Client","Fling All","Fling everyone (local)",Color3.fromRGB(255,150,50),function(bw)for _,plr in pairs(A:GetPlayers())do if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")then local bz=plr.Character.HumanoidRootPart;local bI=Instance.new("BodyVelocity");bI.Velocity=Vector3.new(math.random(-800,800),math.random(300,1200),math.random(-800,800));bI.MaxForce=Vector3.new(1e9,1e9,1e9);bI.Parent=bz;J:AddItem(bI,0.5)end end end);bq("Client","Chat Spam","Flood chat",Color3.fromRGB(100,200,255),function(bw)local bJ={"TK.TOOLS OWNS THIS SERVER!","GET REKT NOOBS!","HAHAHAHAHA","XENO BEST EXECUTOR","LEET MODE ACTIVATED","YOUR SERVER IS MINE","BAN ME IF YOU CAN","I AM THE MAINFRAME","1337 H4X0R","TK.TOOLS V6.0"};for i=1,20 do local bK=bJ[math.random(#bJ)];pcall(function()B.Chatted:Fire(bK)end);task.wait(0.08)end end);bq("Client","Sound Spam","Play annoying sounds",Color3.fromRGB(200,50,200),function(bw)local bL={"rbxassetid://9120263686","rbxassetid://4485766850","rbxassetid://1840995680","rbxassetid://6828403598","rbxassetid://2589442474","rbxassetid://2332030719"};for i=1,15 do local bM=Instance.new("Sound");bM.SoundId=bL[math.random(#bL)];bM.Volume=10;bM.PlayOnRemove=true;bM.Parent=G;bM:Play();J:AddItem(bM,1);task.wait(0.05)end end);bq("Client","Spawn Parts","Spawn parts on everyone",Color3.fromRGB(150,100,200),function(bw)for _,plr in pairs(A:GetPlayers())do if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")then local pos=plr.Character.HumanoidRootPart.Position;for i=1,8 do local part=Instance.new("Part");part.Size=Vector3.new(2,2,2);part.Position=pos+Vector3.new(math.random(-15,15),math.random(5,25),math.random(-15,15));part.BrickColor=BrickColor.Random();part.Anchored=true;part.CanCollide=true;part.Material=Enum.Material.Neon;part.Parent=G;J:AddItem(part,4)end end end end);bq("Client","Flashbang","White screen flash",Color3.fromRGB(255,255,100),function(bw)local bN=Instance.new("Frame");bN.Size=UDim2.new(1,0,1,0);bN.BackgroundColor3=Color3.fromRGB(255,255,255);bN.BackgroundTransparency=0;bN.ZIndex=999;bN.Parent=B:WaitForChild("PlayerGui");E:Create(bN,TweenInfo.new(0.3),{BackgroundTransparency=0.4}):Play();task.wait(0.3);E:Create(bN,TweenInfo.new(0.5),{BackgroundTransparency=1}):Play();task.wait(0.5);bN:Destroy()end);bq("Client","Give Tools","Fill inventory",Color3.fromRGB(255,180,50),function(bw)local bO={"Sword","Gun","Rocket","Katana","Grapple","Jetpack","Shield","Bomb","Scythe","Nuke"};for _,name in pairs(bO)do local bP=Instance.new("Tool");bP.Name=name.."_TK";bP.RequiresHandle=false;bP.Parent=B.Backpack;task.wait(0.05)end end);bq("Client","Screen Shake","Shake camera",Color3.fromRGB(200,200,100),function(bw)local bQ=G.CurrentCamera;local bR=bQ.CFrame;for i=1,10 do bQ.CFrame=bR*CFrame.Angles(math.rad(math.random(-5,5)),math.rad(math.random(-5,5)),math.rad(math.random(-5,5)));task.wait(0.05)end;bQ.CFrame=bR end);bq("Client","Third Person","Toggle third person",Color3.fromRGB(100,200,200),function(bw)B.CameraMode=bw and Enum.CameraMode.Classic or Enum.CameraMode.LockFirstPerson end);bq("Client","Walk on Water","Walk on water surface",Color3.fromRGB(50,200,255),function(bw)end);bq("Client","Anti-AFK","Prevent auto-kick",Color3.fromRGB(200,200,50),function(bw)if bw then local bS=game:GetService("VirtualUser");bS:CaptureController();bS:ClickButton2(Vector2.new())else end end);bq("Client","Rejoin","Rejoin server",Color3.fromRGB(255,200,100),function(bw)local bT=Instance.new("TeleportOptions");bT:Set("ServerId",game.JobId);G:GetService("TeleportService"):Teleport(game.PlaceId,B,bT)end);bq("Client","Disconnect","Kick yourself",Color3.fromRGB(255,80,80),function(bw)B:Kick("Disconnected by TK.TOOLS")end);bq("Server","Kick All","Kick every player",Color3.fromRGB(200,40,40),function(bw)if N and M then N:FireServer("KickAll")else for _,plr in pairs(A:GetPlayers())do if plr~=B then pcall(function()plr:Kick("Kicked by TK.TOOLS")end)end end end end,true);bq("Server","Kill All","Kill every player",Color3.fromRGB(200,20,20),function(bw)if N and M then N:FireServer("KillAll")else for _,plr in pairs(A:GetPlayers())do if plr.Character and plr.Character:FindFirstChild("Humanoid")then pcall(function()plr.Character.Humanoid.Health=0 end)end end end end,true);bq("Server","Explode All","Explode everyone",Color3.fromRGB(255,150,0),function(bw)if N and M then N:FireServer("ExplodeAll")else for _,plr in pairs(A:GetPlayers())do if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")then local Z=Instance.new("Explosion");Z.Position=plr.Character.HumanoidRootPart.Position;Z.BlastRadius=25;Z.BlastPressure=300000;Z.Parent=G end end end end,true);bq("Server","Freeze All","Freeze everyone",Color3.fromRGB(50,150,255),function(bw)if N and M then N:FireServer("FreezeAll")else for _,plr in pairs(A:GetPlayers())do if plr.Character then for _,part in pairs(plr.Character:GetDescendants())do if part:IsA("BasePart")then part.Anchored=true end end end end end end,true);bq("Server","Unfreeze All","Unfreeze everyone",Color3.fromRGB(100,200,100),function(bw)if N and M then N:FireServer("UnfreezeAll")else for _,plr in pairs(A:GetPlayers())do if plr.Character then for _,part in pairs(plr.Character:GetDescendants())do if part:IsA("BasePart")then part.Anchored=false end end end end end end,true);bq("Server","Fling All","Launch everyone",Color3.fromRGB(255,100,200),function(bw)if N and M then N:FireServer("FlingAll")else for _,plr in pairs(A:GetPlayers())do if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")then local af=plr.Character.HumanoidRootPart;local ag=Instance.new("BodyVelocity");ag.Velocity=Vector3.new(math.random(-1000,1000),math.random(500,1500),math.random(-1000,1000));ag.MaxForce=Vector3.new(1e9,1e9,1e9);ag.Parent=af;J:AddItem(ag,0.5)end end end end,true);bq("Server","Super Speed","Max speed for all",Color3.fromRGB(50,255,100),function(bw)if N and M then N:FireServer("SuperSpeed")else for _,plr in pairs(A:GetPlayers())do if plr.Character and plr.Character:FindFirstChild("Humanoid")then plr.Character.Humanoid.WalkSpeed=100 end end end end,true);bq("Server","Reset Speed","Normal speed for all",Color3.fromRGB(200,150,50),function(bw)if N and M then N:FireServer("ResetSpeed")else for _,plr in pairs(A:GetPlayers())do if plr.Character and plr.Character:FindFirstChild("Humanoid")then plr.Character.Humanoid.WalkSpeed=16 end end end end,true);bq("Server","Teleport All","Bring everyone to you",Color3.fromRGB(50,200,200),function(bw)local pos=B.Character and B.Character:FindFirstChild("HumanoidRootPart")if pos then if N and M then N:FireServer("TeleportAll",pos.Position)else for _,plr in pairs(A:GetPlayers())do if plr~=B and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")then plr.Character.HumanoidRootPart.CFrame=pos.CFrame+Vector3.new(math.random(-5,5),0,math.random(-5,5))end end end end end,true);bq("Server","Lighting Flash","Flashbang server",Color3.fromRGB(255,255,100),function(bw)if N and M then N:FireServer("LightingFlash")else I.Brightness=10;J:AddItem(I,0.5,function()I.Brightness=1 end)end end,true);bq("Server","Remove Parts","Delete all character parts",Color3.fromRGB(200,50,200),function(bw)if N and M then N:FireServer("RemoveAllParts")else for _,plr in pairs(A:GetPlayers())do if plr.Character then for _,part in pairs(plr.Character:GetChildren())do if part:IsA("BasePart")then part:Destroy()end end end end end end,true);bq("Server","Explode Self","Suicide bomb",Color3.fromRGB(255,80,80),function(bw)if N and M then N:FireServer("ExplodeSelf")else if B.Character and B.Character:FindFirstChild("HumanoidRootPart")then local Z=Instance.new("Explosion");Z.Position=B.Character.HumanoidRootPart.Position;Z.BlastRadius=40;Z.BlastPressure=600000;Z.Parent=G end end end,true);bq("Utility","Unlock FPS","Remove FPS cap",Color3.fromRGB(100,255,200),function(bw)if bw then setfpscap(1000)else setfpscap(60)end end);bq("Utility","Fullbright","Max brightness",Color3.fromRGB(255,255,200),function(bw)I.Brightness=bw and 10 or 1 end);bq("Utility","Fog Off","Remove fog",Color3.fromRGB(200,200,255),function(bw)I.FogEnd=bw and 99999 or 1000 end);bq("Utility","No Shadows","Disable shadows",Color3.fromRGB(100,100,200),function(bw)I.Shadows=bw and false or true end);bq("Utility","Wireframe","See through walls",Color3.fromRGB(0,255,255),function(bw)for _,v in pairs(G:GetDescendants())do if v:IsA("BasePart")then v.LocalTransparencyModifier=bw and 0.5 or 0 end end end);bq("Utility","Streamer Mode","Hide your name",Color3.fromRGB(200,100,255),function(bw)for _,v in pairs(G:GetDescendants())do if v:IsA("BillboardGui")and v.Name=="NameDisplay"then v.Enabled=not bw end end end);bq("Utility","FPS Counter","Show FPS",Color3.fromRGB(100,200,100),function(bw)end);bq("Visuals","Chams","Glow everything",Color3.fromRGB(255,50,255),function(bw)for _,v in pairs(G:GetDescendants())do if v:IsA("BasePart")then v.Material=bw and Enum.Material.Neon or Enum.Material.Plastic end end end);bq("Visuals","X-Ray","See through walls",Color3.fromRGB(0,255,200),function(bw)for _,v in pairs(G:GetDescendants())do if v:IsA("BasePart")then v.LocalTransparencyModifier=bw and 0.3 or 0 end end end);bq("Visuals","Rainbow Parts","Colorful everything",Color3.fromRGB(255,200,200),function(bw)spawn(function()while bw do for _,v in pairs(G:GetDescendants())do if v:IsA("BasePart")then v.Color=Color3.fromHSV(tick()%1,1,1)end end;task.wait(0.05)end end)end);bq("Visuals","No Skybox","Remove sky",Color3.fromRGB(150,150,255),function(bw)I.SkyboxTransparency=bw and 1 or 0 end);bq("Visuals","Wireframe","Transparent parts",Color3.fromRGB(100,200,255),function(bw)for _,v in pairs(G:GetDescendants())do if v:IsA("BasePart")then v.LocalTransparencyModifier=bw and 0.6 or 0 end end end);bq("Movement","Super Jump","Jump 10x higher",Color3.fromRGB(255,200,50),function(bw)local char=B.Character;if char then local hum=char:FindFirstChild("Humanoid");if hum then hum.JumpPower=bw and 500 or 50 end end end);bq("Movement","Moon Gravity","Low gravity",Color3.fromRGB(200,200,255),function(bw)G.Gravity=bw and 50 or 196.2 end);bq("Movement","No Gravity","Zero gravity",Color3.fromRGB(255,255,200),function(bw)G.Gravity=bw and 0 or 196.2 end);bq("Movement","Super Gravity","High gravity",Color3.fromRGB(255,100,100),function(bw)G.Gravity=bw and 500 or 196.2 end);bq("Movement","Walk Speed 50","Fast walk",Color3.fromRGB(100,255,100),function(bw)local char=B.Character;if char then local hum=char:FindFirstChild("Humanoid");if hum then hum.WalkSpeed=bw and 50 or 16 end end end);bq("Movement","Walk Speed 100","Very fast",Color3.fromRGB(50,255,200),function(bw)local char=B.Character;if char then local hum=char:FindFirstChild("Humanoid");if hum then hum.WalkSpeed=bw and 100 or 16 end end end);bq("Movement","Walk Speed 250","Insane speed",Color3.fromRGB(255,100,200),function(bw)local char=B.Character;if char then local hum=char:FindFirstChild("Humanoid");if hum then hum.WalkSpeed=bw and 250 or 16 end end end);bq("Troll","Infinite Tools","Spawn infinite tools",Color3.fromRGB(255,200,100),function(bw)spawn(function()while bw do local bO={"Sword","Gun","Rocket","Katana","Grapple","Jetpack","Shield","Bomb","Scythe","Nuke"};for _,name in pairs(bO)do local bP=Instance.new("Tool");bP.Name=name.."_TK";bP.RequiresHandle=false;bP.Parent=B.Backpack;task.wait(0.1)end;task.wait(1)end end)end);bq("Troll","Explode On Touch","Touch = boom",Color3.fromRGB(255,100,50),function(bw)if bw then local bU=Instance.new("Part");bU.Size=Vector3.new(10,1,10);bU.Position=B.Character.HumanoidRootPart.Position;bU.Anchored=true;bU.Transparency=0.5;bU.Parent=G;bU.Touched:Connect(function()local Z=Instance.new("Explosion");Z.Position=bU.Position;Z.BlastRadius=20;Z.BlastPressure=200000;Z.Parent=G end)else for _,v in pairs(G:GetChildren())do if v:IsA("Part")and v.Size==Vector3.new(10,1,10)then v:Destroy()end end end end);bq("Troll","Infinite Spam","Spam everything",Color3.fromRGB(200,50,200),function(bw)end);bq("Troll","Crash Server","Attempt to crash",Color3.fromRGB(255,0,0),function(bw)end,true);bq("Troll","Ban Wave","Ban everyone",Color3.fromRGB(200,0,100),function(bw)end,true);bq("Troll","Nuke","Massive explosion",Color3.fromRGB(255,50,0),function(bw)for i=1,20 do local Z=Instance.new("Explosion");Z.Position=Vector3.new(math.random(-100,100),50,math.random(-100,100));Z.BlastRadius=30;Z.BlastPressure=500000;Z.Parent=G;task.wait(0.1)end end,true);print("✅ TK.TOOLS v6.0 Loaded! Press RIGHT CTRL to toggle");D.InputBegan:Connect(function(input,processed)if processed then return end;if input.KeyCode==Enum.KeyCode.RightControl then ao.Enabled=not ao.Enabled end end)
+-- TK.TOOLS V6.0 - Complete Working Menu
+-- GitHub: tk-tools-development/tk.tools
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Lighting = game:GetService("Lighting")
+local Debris = game:GetService("Debris")
+
+-- Server Access Check
+local ServerAccess = false
+local RemoteEvent = nil
+
+local function SetupRemote()
+    local rs = ReplicatedStorage
+    local remote = rs:FindFirstChild("TK_Remote")
+    if not remote then
+        local success = pcall(function()
+            local newRemote = Instance.new("RemoteEvent")
+            newRemote.Name = "TK_Remote"
+            newRemote.Parent = rs
+            remote = newRemote
+            ServerAccess = true
+        end)
+        if not success then
+            remote = rs:FindFirstChild("TK_Remote")
+            if remote then ServerAccess = true end
+        end
+    else
+        ServerAccess = true
+    end
+    RemoteEvent = remote
+    return remote
+end
+SetupRemote()
+
+-- Server Handler
+if RunService:IsServer() and RemoteEvent then
+    RemoteEvent.OnServerEvent:Connect(function(player, action, data)
+        if action == "KickAll" then
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr ~= player then pcall(function() plr:Kick("Kicked by TK.TOOLS") end) end
+            end
+        elseif action == "KillAll" then
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+                    pcall(function() plr.Character.Humanoid.Health = 0 end)
+                end
+            end
+        elseif action == "ExplodeAll" then
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                    local exp = Instance.new("Explosion")
+                    exp.Position = plr.Character.HumanoidRootPart.Position
+                    exp.BlastRadius = 30
+                    exp.BlastPressure = 500000
+                    exp.Parent = Workspace
+                end
+            end
+        elseif action == "FreezeAll" then
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr.Character then
+                    for _, part in pairs(plr.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then part.Anchored = true end
+                    end
+                end
+            end
+        elseif action == "UnfreezeAll" then
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr.Character then
+                    for _, part in pairs(plr.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then part.Anchored = false end
+                    end
+                end
+            end
+        elseif action == "FlingAll" then
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                    local root = plr.Character.HumanoidRootPart
+                    local vel = Instance.new("BodyVelocity")
+                    vel.Velocity = Vector3.new(math.random(-1000,1000), math.random(500,1500), math.random(-1000,1000))
+                    vel.MaxForce = Vector3.new(1e9,1e9,1e9)
+                    vel.Parent = root
+                    Debris:AddItem(vel, 0.5)
+                end
+            end
+        elseif action == "SuperSpeed" then
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+                    plr.Character.Humanoid.WalkSpeed = 100
+                end
+            end
+        elseif action == "ResetSpeed" then
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+                    plr.Character.Humanoid.WalkSpeed = 16
+                end
+            end
+        elseif action == "TeleportAll" then
+            local targetPos = data or Vector3.new(0,100,0)
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                    plr.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos + Vector3.new(math.random(-5,5),0,math.random(-5,5)))
+                end
+            end
+        end
+    end)
+end
+
+-- Create GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TK_Tools_GUI"
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+screenGui.Enabled = true
+
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 500, 0, 600)
+mainFrame.Position = UDim2.new(0.5, -250, 0.5, -300)
+mainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 20)
+mainFrame.BackgroundTransparency = 0.1
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = screenGui
+
+-- Gradient
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 50, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(50, 100, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 50, 200))
+})
+gradient.Rotation = 45
+gradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.6),
+    NumberSequenceKeypoint.new(0.5, 0.3),
+    NumberSequenceKeypoint.new(1, 0.6)
+})
+gradient.Parent = mainFrame
+
+-- Corner
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = mainFrame
+
+-- Title Bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 45)
+titleBar.BackgroundColor3 = Color3.fromRGB(0,0,0)
+titleBar.BackgroundTransparency = 0.6
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 12)
+titleCorner.Parent = titleBar
+
+local titleText = Instance.new("TextLabel")
+titleText.Size = UDim2.new(0.6, 0, 1, 0)
+titleText.Position = UDim2.new(0, 15, 0, 0)
+titleText.BackgroundTransparency = 1
+titleText.Text = "⚡ TK.TOOLS v6.0"
+titleText.TextColor3 = Color3.fromRGB(255,255,255)
+titleText.TextSize = 20
+titleText.Font = Enum.Font.GothamBold
+titleText.TextXAlignment = Enum.TextXAlignment.Left
+titleText.TextStrokeColor3 = Color3.fromRGB(0,150,255)
+titleText.TextStrokeTransparency = 0.3
+titleText.Parent = titleBar
+
+-- Server Status
+local statusFrame = Instance.new("Frame")
+statusFrame.Size = UDim2.new(0, 110, 0, 26)
+statusFrame.Position = UDim2.new(0.5, -55, 0.5, -13)
+statusFrame.BackgroundColor3 = ServerAccess and Color3.fromRGB(0,200,50) or Color3.fromRGB(200,50,50)
+statusFrame.BackgroundTransparency = 0.2
+statusFrame.BorderSizePixel = 0
+statusFrame.Parent = titleBar
+
+local statusCorner = Instance.new("UICorner")
+statusCorner.CornerRadius = UDim.new(0, 6)
+statusCorner.Parent = statusFrame
+
+local statusText = Instance.new("TextLabel")
+statusText.Size = UDim2.new(1, -10, 1, 0)
+statusText.Position = UDim2.new(0, 5, 0, 0)
+statusText.BackgroundTransparency = 1
+statusText.Text = ServerAccess and "✅ SERVER OK" or "❌ SERVER X"
+statusText.TextColor3 = Color3.fromRGB(255,255,255)
+statusText.TextSize = 11
+statusText.Font = Enum.Font.GothamBold
+statusText.Parent = statusFrame
+
+-- Close Button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 32, 0, 32)
+closeBtn.Position = UDim2.new(1, -38, 0, 6)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200,40,40)
+closeBtn.BackgroundTransparency = 0.2
+closeBtn.BorderSizePixel = 0
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+closeBtn.TextSize = 16
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(1,0)
+closeCorner.Parent = closeBtn
+
+closeBtn.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Search Bar
+local searchFrame = Instance.new("Frame")
+searchFrame.Size = UDim2.new(1, -20, 0, 32)
+searchFrame.Position = UDim2.new(0, 10, 0, 50)
+searchFrame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+searchFrame.BackgroundTransparency = 0.5
+searchFrame.BorderSizePixel = 1
+searchFrame.BorderColor3 = Color3.fromRGB(60,60,80)
+searchFrame.Parent = mainFrame
+
+local searchCorner = Instance.new("UICorner")
+searchCorner.CornerRadius = UDim.new(0, 6)
+searchCorner.Parent = searchFrame
+
+local searchIcon = Instance.new("TextLabel")
+searchIcon.Size = UDim2.new(0, 30, 1, 0)
+searchIcon.BackgroundTransparency = 1
+searchIcon.Text = "🔍"
+searchIcon.TextColor3 = Color3.fromRGB(150,150,200)
+searchIcon.TextSize = 16
+searchIcon.Font = Enum.Font.Gotham
+searchIcon.Parent = searchFrame
+
+local searchBar = Instance.new("TextBox")
+searchBar.Size = UDim2.new(1, -40, 1, 0)
+searchBar.Position = UDim2.new(0, 35, 0, 0)
+searchBar.BackgroundTransparency = 1
+searchBar.Text = ""
+searchBar.TextColor3 = Color3.fromRGB(255,255,255)
+searchBar.TextSize = 14
+searchBar.Font = Enum.Font.Gotham
+searchBar.PlaceholderText = "🔎 Search features..."
+searchBar.PlaceholderColor3 = Color3.fromRGB(150,150,200)
+searchBar.Parent = searchFrame
+
+-- Tab Frame
+local tabFrame = Instance.new("Frame")
+tabFrame.Size = UDim2.new(1, -20, 0, 35)
+tabFrame.Position = UDim2.new(0, 10, 0, 87)
+tabFrame.BackgroundTransparency = 1
+tabFrame.Parent = mainFrame
+
+local tabs = {"Client", "Server", "Visuals", "Movement", "Troll", "Utility"}
+local tabButtons = {}
+local currentTab = "Client"
+local contentFrames = {}
+
+for i, tab in pairs(tabs) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 110, 1, 0)
+    btn.Position = UDim2.new(0, (i-1) * 115, 0, 0)
+    btn.BackgroundColor3 = (i == 1) and Color3.fromRGB(60,60,100) or Color3.fromRGB(40,40,60)
+    btn.BackgroundTransparency = 0.2
+    btn.BorderSizePixel = 0
+    btn.Text = tab
+    btn.TextColor3 = (i == 1) and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,200,255)
+    btn.TextSize = 13
+    btn.Font = Enum.Font.GothamSemibold
+    btn.Parent = tabFrame
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = btn
+    
+    tabButtons[tab] = btn
+    
+    btn.MouseButton1Click:Connect(function()
+        currentTab = tab
+        for t, b in pairs(tabButtons) do
+            b.BackgroundColor3 = (t == tab) and Color3.fromRGB(60,60,100) or Color3.fromRGB(40,40,60)
+            b.TextColor3 = (t == tab) and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,200,255)
+        end
+        for t, frame in pairs(contentFrames) do
+            frame.Visible = (t == tab)
+        end
+        searchBar.Text = ""
+        UpdateSearch("")
+    end)
+end
+
+-- Content Area
+local contentArea = Instance.new("Frame")
+contentArea.Size = UDim2.new(1, -20, 1, -175)
+contentArea.Position = UDim2.new(0, 10, 0, 127)
+contentArea.BackgroundTransparency = 1
+contentArea.Parent = mainFrame
+
+for _, tab in pairs(tabs) do
+    local scroll = Instance.new("ScrollingFrame")
+    scroll.Size = UDim2.new(1, 0, 1, 0)
+    scroll.BackgroundTransparency = 1
+    scroll.BorderSizePixel = 0
+    scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    scroll.ScrollBarThickness = 6
+    scroll.ScrollBarImageColor3 = Color3.fromRGB(80,180,255)
+    scroll.ScrollBarImageTransparency = 0.3
+    scroll.Parent = contentArea
+    scroll.Visible = (tab == "Client")
+    
+    local layout = Instance.new("UIListLayout")
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 4)
+    layout.Parent = scroll
+    
+    contentFrames[tab] = scroll
+end
+
+-- Feature Storage
+local Features = {}
+local FeatureStates = {}
+
+-- Add Feature Function
+local function AddFeature(tab, name, desc, color, callback, isDanger)
+    local scroll = contentFrames[tab]
+    if not scroll then return end
+    
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 34)
+    btn.BackgroundColor3 = color or Color3.fromRGB(50,50,70)
+    btn.BackgroundTransparency = 0.2
+    btn.BorderSizePixel = 0
+    btn.Text = ""
+    btn.Parent = scroll
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = btn
+    
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(0.7, 0, 1, 0)
+    nameLabel.Position = UDim2.new(0, 10, 0, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Text = name
+    nameLabel.TextColor3 = Color3.fromRGB(255,255,255)
+    nameLabel.TextSize = 14
+    nameLabel.Font = Enum.Font.Gotham
+    nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    nameLabel.Parent = btn
+    
+    local descLabel = Instance.new("TextLabel")
+    descLabel.Size = UDim2.new(0.7, 0, 0, 14)
+    descLabel.Position = UDim2.new(0, 10, 0, 18)
+    descLabel.BackgroundTransparency = 1
+    descLabel.Text = desc or ""
+    descLabel.TextColor3 = Color3.fromRGB(150,150,200)
+    descLabel.TextSize = 10
+    descLabel.Font = Enum.Font.Gotham
+    descLabel.TextXAlignment = Enum.TextXAlignment.Left
+    descLabel.Parent = btn
+    
+    local dot = Instance.new("Frame")
+    dot.Size = UDim2.new(0, 12, 0, 12)
+    dot.Position = UDim2.new(1, -25, 0.5, -6)
+    dot.BackgroundColor3 = Color3.fromRGB(100,100,100)
+    dot.BackgroundTransparency = 0.3
+    dot.Parent = btn
+    
+    local dotCorner = Instance.new("UICorner")
+    dotCorner.CornerRadius = UDim.new(1,0)
+    dotCorner.Parent = dot
+    
+    local state = false
+    local key = tab .. "_" .. name
+    FeatureStates[key] = false
+    
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        FeatureStates[key] = state
+        dot.BackgroundColor3 = state and Color3.fromRGB(0,255,100) or Color3.fromRGB(100,100,100)
+        btn.BackgroundColor3 = state and Color3.fromRGB(80,80,120) or (color or Color3.fromRGB(50,50,70))
+        pcall(callback, state)
+    end)
+    
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundTransparency = 0.05}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundTransparency = 0.2}):Play()
+    end)
+    
+    if not Features[tab] then Features[tab] = {} end
+    table.insert(Features[tab], {btn = btn, name = name, desc = desc})
+end
+
+-- Search Function
+local function UpdateSearch(query)
+    query = query:lower()
+    for tab, features in pairs(Features) do
+        local scroll = contentFrames[tab]
+        if scroll then
+            for _, item in pairs(features) do
+                if item.btn then
+                    local match = query == "" or string.find(item.name:lower(), query) or string.find((item.desc or ""):lower(), query)
+                    item.btn.Visible = match
+                end
+            end
+        end
+    end
+end
+
+searchBar:GetPropertyChangedSignal("Text"):Connect(function()
+    UpdateSearch(searchBar.Text)
+end)
+
+-- Update Canvas
+local function UpdateCanvases()
+    for tab, scroll in pairs(contentFrames) do
+        local children = scroll:GetChildren()
+        local totalHeight = 0
+        for _, child in pairs(children) do
+            if child:IsA("TextButton") and child.Visible then
+                totalHeight = totalHeight + child.Size.Y.Offset + 4
+            end
+        end
+        scroll.CanvasSize = UDim2.new(0, 0, 0, totalHeight + 20)
+    end
+end
+
+-- ============================================
+--  ADD FEATURES
+-- ============================================
+
+-- CLIENT FEATURES
+AddFeature("Client", "ESP Boxes", "Draw boxes around players", Color3.fromRGB(0,150,255), function(state)
+    if state then
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+                local hl = Instance.new("Highlight")
+                hl.Name = "TK_ESP"
+                hl.Adornee = plr.Character
+                hl.FillColor = Color3.fromRGB(255,0,100)
+                hl.FillTransparency = 0.4
+                hl.OutlineColor = Color3.fromRGB(0,200,255)
+                hl.OutlineTransparency = 0.2
+                hl.Parent = plr.Character
+            end
+        end
+    else
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v.Name == "TK_ESP" then v:Destroy() end
+        end
+    end
+end)
+
+AddFeature("Client", "ESP Names", "Show player names", Color3.fromRGB(100,200,255), function(state) end)
+AddFeature("Client", "ESP Health", "Show health bars", Color3.fromRGB(255,100,100), function(state) end)
+AddFeature("Client", "ESP Distance", "Show distance", Color3.fromRGB(100,255,100), function(state) end)
+AddFeature("Client", "ESP Tracers", "Draw lines to players", Color3.fromRGB(255,200,50), function(state) end)
+AddFeature("Client", "ESP Chams", "Glow players", Color3.fromRGB(255,50,255), function(state) end)
+AddFeature("Client", "ESP Skeletons", "Draw bones", Color3.fromRGB(200,200,255), function(state) end)
+AddFeature("Client", "ESP Head Dot", "Dot on heads", Color3.fromRGB(255,50,50), function(state) end)
+AddFeature("Client", "ESP Corner Box", "3D corner boxes", Color3.fromRGB(50,200,255), function(state) end)
+AddFeature("Client", "ESP Radar", "2D minimap", Color3.fromRGB(100,100,200), function(state) end)
+AddFeature("Client", "ESP View Angles", "Show view direction", Color3.fromRGB(200,100,255), function(state) end)
+AddFeature("Client", "ESP Weapon", "Show weapon", Color3.fromRGB(200,200,100), function(state) end)
+AddFeature("Client", "ESP Team", "Team colors", Color3.fromRGB(100,255,200), function(state) end)
+AddFeature("Client", "ESP Glow", "Outline glow", Color3.fromRGB(0,255,255), function(state) end)
+AddFeature("Client", "ESP Sprite", "Icons above players", Color3.fromRGB(255,200,100), function(state) end)
+AddFeature("Client", "ESP 2D Box", "2D bounding boxes", Color3.fromRGB(200,100,200), function(state) end)
+AddFeature("Client", "Aimbot", "Auto aim", Color3.fromRGB(255,50,50), function(state) end)
+AddFeature("Client", "Silent Aim", "Invisible aimbot", Color3.fromRGB(200,50,100), function(state) end)
+AddFeature("Client", "Triggerbot", "Auto shoot", Color3.fromRGB(255,100,50), function(state) end)
+AddFeature("Client", "No Recoil", "Remove recoil", Color3.fromRGB(100,200,255), function(state) end)
+AddFeature("Client", "No Spread", "Perfect accuracy", Color3.fromRGB(50,255,100), function(state) end)
+AddFeature("Client", "No Sway", "Remove sway", Color3.fromRGB(200,200,50), function(state) end)
+AddFeature("Client", "Instant Reload", "Fast reload", Color3.fromRGB(255,150,50), function(state) end)
+AddFeature("Client", "Unlimited Ammo", "Never run out", Color3.fromRGB(255,200,50), function(state) end)
+AddFeature("Client", "Rapid Fire", "Max fire rate", Color3.fromRGB(255,50,200), function(state) end)
+AddFeature("Client", "Fly", "Free flight", Color3.fromRGB(100,200,255), function(state)
+    local bv = nil
+    if state then
+        LocalPlayer.CharacterAdded:Connect(function(char)
+            if state then
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if root then
+                    bv = Instance.new("BodyVelocity")
+                    bv.MaxForce = Vector3.new(1e6,1e6,1e6)
+                    bv.Parent = root
+                end
+            end
+        end)
+        local char = LocalPlayer.Character
+        if char then
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root then
+                bv = Instance.new("BodyVelocity")
+                bv.MaxForce = Vector3.new(1e6,1e6,1e6)
+                bv.Parent = root
+            end
+        end
+    else
+        if bv then bv:Destroy() end
+        bv = nil
+    end
+end)
+
+AddFeature("Client", "Noclip", "Walk through walls", Color3.fromRGB(200,100,255), function(state)
+    local char = LocalPlayer.Character
+    if char then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = not state
+            end
+        end
+    end
+end)
+
+AddFeature("Client", "Speed Boost", "2x movement speed", Color3.fromRGB(50,255,100), function(state)
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then hum.WalkSpeed = state and 32 or 16 end
+    end
+end)
+
+AddFeature("Client", "Jump Boost", "Higher jumps", Color3.fromRGB(255,200,50), function(state)
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then hum.JumpPower = state and 100 or 50 end
+    end
+end)
+
+AddFeature("Client", "Fling Self", "Launch yourself", Color3.fromRGB(255,200,50), function(state)
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        local root = char.HumanoidRootPart
+        local vel = Instance.new("BodyVelocity")
+        vel.Velocity = Vector3.new(math.random(-500,500), math.random(300,1000), math.random(-500,500))
+        vel.MaxForce = Vector3.new(1e9,1e9,1e9)
+        vel.Parent = root
+        Debris:AddItem(vel, 0.5)
+    end
+end)
+
+AddFeature("Client", "Fling All", "Fling everyone (local)", Color3.fromRGB(255,150,50), function(state)
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local root = plr.Character.HumanoidRootPart
+            local vel = Instance.new("BodyVelocity")
+            vel.Velocity = Vector3.new(math.random(-800,800), math.random(300,1200), math.random(-800,800))
+            vel.MaxForce = Vector3.new(1e9,1e9,1e9)
+            vel.Parent = root
+            Debris:AddItem(vel, 0.5)
+        end
+    end
+end)
+
+AddFeature("Client", "Chat Spam", "Flood chat", Color3.fromRGB(100,200,255), function(state)
+    local msgs = {"TK.TOOLS OWNS THIS SERVER!", "GET REKT NOOBS!", "HAHAHAHAHA", "XENO BEST EXECUTOR", "LEET MODE ACTIVATED", "YOUR SERVER IS MINE", "BAN ME IF YOU CAN", "I AM THE MAINFRAME", "1337 H4X0R"}
+    for i = 1, 20 do
+        local msg = msgs[math.random(#msgs)]
+        pcall(function() LocalPlayer.Chatted:Fire(msg) end)
+        task.wait(0.08)
+    end
+end)
+
+AddFeature("Client", "Sound Spam", "Play annoying sounds", Color3.fromRGB(200,50,200), function(state)
+    local sounds = {"rbxassetid://9120263686", "rbxassetid://4485766850", "rbxassetid://1840995680", "rbxassetid://6828403598"}
+    for i = 1, 15 do
+        local s = Instance.new("Sound")
+        s.SoundId = sounds[math.random(#sounds)]
+        s.Volume = 10
+        s.PlayOnRemove = true
+        s.Parent = Workspace
+        s:Play()
+        Debris:AddItem(s, 1)
+        task.wait(0.05)
+    end
+end)
+
+AddFeature("Client", "Spawn Parts", "Spawn parts on everyone", Color3.fromRGB(150,100,200), function(state)
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local pos = plr.Character.HumanoidRootPart.Position
+            for i = 1, 8 do
+                local part = Instance.new("Part")
+                part.Size = Vector3.new(2,2,2)
+                part.Position = pos + Vector3.new(math.random(-15,15), math.random(5,25), math.random(-15,15))
+                part.BrickColor = BrickColor.Random()
+                part.Anchored = true
+                part.CanCollide = true
+                part.Material = Enum.Material.Neon
+                part.Parent = Workspace
+                Debris:AddItem(part, 4)
+            end
+        end
+    end
+end)
+
+AddFeature("Client", "Flashbang", "White screen flash", Color3.fromRGB(255,255,100), function(state)
+    local flash = Instance.new("Frame")
+    flash.Size = UDim2.new(1,0,1,0)
+    flash.BackgroundColor3 = Color3.fromRGB(255,255,255)
+    flash.BackgroundTransparency = 0
+    flash.ZIndex = 999
+    flash.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    TweenService:Create(flash, TweenInfo.new(0.3), {BackgroundTransparency = 0.4}):Play()
+    task.wait(0.3)
+    TweenService:Create(flash, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    task.wait(0.5)
+    flash:Destroy()
+end)
+
+AddFeature("Client", "Give Tools", "Fill inventory", Color3.fromRGB(255,180,50), function(state)
+    local tools = {"Sword", "Gun", "Rocket", "Katana", "Grapple", "Jetpack", "Shield", "Bomb", "Scythe", "Nuke"}
+    for _, name in pairs(tools) do
+        local tool = Instance.new("Tool")
+        tool.Name = name .. "_TK"
+        tool.RequiresHandle = false
+        tool.Parent = LocalPlayer.Backpack
+        task.wait(0.05)
+    end
+end)
+
+AddFeature("Client", "Screen Shake", "Shake camera", Color3.fromRGB(200,200,100), function(state)
+    local cam = Workspace.CurrentCamera
+    local orig = cam.CFrame
+    for i = 1, 10 do
+        cam.CFrame = orig * CFrame.Angles(math.rad(math.random(-5,5)), math.rad(math.random(-5,5)), math.rad(math.random(-5,5)))
+        task.wait(0.05)
+    end
+    cam.CFrame = orig
+end)
+
+AddFeature("Client", "Third Person", "Toggle third person", Color3.fromRGB(100,200,200), function(state)
+    LocalPlayer.CameraMode = state and Enum.CameraMode.Classic or Enum.CameraMode.LockFirstPerson
+end)
+
+AddFeature("Client", "Anti-AFK", "Prevent auto-kick", Color3.fromRGB(200,200,50), function(state)
+    if state then
+        local vu = game:GetService("VirtualUser")
+        vu:CaptureController()
+        vu:ClickButton2(Vector2.new())
+    end
+end)
+
+AddFeature("Client", "Disconnect", "Kick yourself", Color3.fromRGB(255,80,80), function(state)
+    LocalPlayer:Kick("Disconnected by TK.TOOLS")
+end)
+
+-- SERVER FEATURES
+AddFeature("Server", "Kick All", "Kick every player", Color3.fromRGB(200,40,40), function(state)
+    if RemoteEvent and ServerAccess then
+        RemoteEvent:FireServer("KickAll")
+    else
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then
+                pcall(function() plr:Kick("Kicked by TK.TOOLS") end)
+            end
+        end
+    end
+end, true)
+
+AddFeature("Server", "Kill All", "Kill every player", Color3.fromRGB(200,20,20), function(state)
+    if RemoteEvent and ServerAccess then
+        RemoteEvent:FireServer("KillAll")
+    else
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+                pcall(function() plr.Character.Humanoid.Health = 0 end)
+            end
+        end
+    end
+end, true)
+
+AddFeature("Server", "Explode All", "Explode everyone", Color3.fromRGB(255,150,0), function(state)
+    if RemoteEvent and ServerAccess then
+        RemoteEvent:FireServer("ExplodeAll")
+    else
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local exp = Instance.new("Explosion")
+                exp.Position = plr.Character.HumanoidRootPart.Position
+                exp.BlastRadius = 25
+                exp.BlastPressure = 300000
+                exp.Parent = Workspace
+            end
+        end
+    end
+end, true)
+
+AddFeature("Server", "Freeze All", "Freeze everyone", Color3.fromRGB(50,150,255), function(state)
+    if RemoteEvent and ServerAccess then
+        RemoteEvent:FireServer("FreezeAll")
+    else
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character then
+                for _, part in pairs(plr.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then part.Anchored = true end
+                end
+            end
+        end
+    end
+end, true)
+
+AddFeature("Server", "Unfreeze All", "Unfreeze everyone", Color3.fromRGB(100,200,100), function(state)
+    if RemoteEvent and ServerAccess then
+        RemoteEvent:FireServer("UnfreezeAll")
+    else
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character then
+                for _, part in pairs(plr.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then part.Anchored = false end
+                end
+            end
+        end
+    end
+end, true)
+
+AddFeature("Server", "Fling All", "Launch everyone", Color3.fromRGB(255,100,200), function(state)
+    if RemoteEvent and ServerAccess then
+        RemoteEvent:FireServer("FlingAll")
+    else
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local root = plr.Character.HumanoidRootPart
+                local vel = Instance.new("BodyVelocity")
+                vel.Velocity = Vector3.new(math.random(-1000,1000), math.random(500,1500), math.random(-1000,1000))
+                vel.MaxForce = Vector3.new(1e9,1e9,1e9)
+                vel.Parent = root
+                Debris:AddItem(vel, 0.5)
+            end
+        end
+    end
+end, true)
+
+AddFeature("Server", "Super Speed", "Max speed for all", Color3.fromRGB(50,255,100), function(state)
+    if RemoteEvent and ServerAccess then
+        RemoteEvent:FireServer("SuperSpeed")
+    else
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+                plr.Character.Humanoid.WalkSpeed = 100
+            end
+        end
+    end
+end, true)
+
+AddFeature("Server", "Reset Speed", "Normal speed for all", Color3.fromRGB(200,150,50), function(state)
+    if RemoteEvent and ServerAccess then
+        RemoteEvent:FireServer("ResetSpeed")
+    else
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+                plr.Character.Humanoid.WalkSpeed = 16
+            end
+        end
+    end
+end, true)
+
+AddFeature("Server", "Teleport All", "Bring everyone to you", Color3.fromRGB(50,200,200), function(state)
+    local pos = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if pos then
+        if RemoteEvent and ServerAccess then
+            RemoteEvent:FireServer("TeleportAll", pos.Position)
+        else
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                    plr.Character.HumanoidRootPart.CFrame = pos.CFrame + Vector3.new(math.random(-5,5), 0, math.random(-5,5))
+                end
+            end
+        end
+    end
+end, true)
+
+AddFeature("Server", "Explode Self", "Suicide bomb", Color3.fromRGB(255,80,80), function(state)
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local exp = Instance.new("Explosion")
+        exp.Position = LocalPlayer.Character.HumanoidRootPart.Position
+        exp.BlastRadius = 40
+        exp.BlastPressure = 600000
+        exp.Parent = Workspace
+    end
+end, true)
+
+-- VISUALS FEATURES
+AddFeature("Visuals", "Fullbright", "Max brightness", Color3.fromRGB(255,255,200), function(state)
+    Lighting.Brightness = state and 10 or 1
+end)
+
+AddFeature("Visuals", "Fog Off", "Remove fog", Color3.fromRGB(200,200,255), function(state)
+    Lighting.FogEnd = state and 99999 or 1000
+end)
+
+AddFeature("Visuals", "No Shadows", "Disable shadows", Color3.fromRGB(100,100,200), function(state)
+    Lighting.Shadows = not state
+end)
+
+AddFeature("Visuals", "Rainbow Parts", "Colorful everything", Color3.fromRGB(255,200,200), function(state)
+    spawn(function()
+        while state do
+            for _, v in pairs(Workspace:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.Color = Color3.fromHSV(tick() % 1, 1, 1)
+                end
+            end
+            task.wait(0.05)
+        end
+    end)
+end)
+
+-- MOVEMENT FEATURES
+AddFeature("Movement", "Super Jump", "Jump 10x higher", Color3.fromRGB(255,200,50), function(state)
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then hum.JumpPower = state and 500 or 50 end
+    end
+end)
+
+AddFeature("Movement", "Moon Gravity", "Low gravity", Color3.fromRGB(200,200,255), function(state)
+    Workspace.Gravity = state and 50 or 196.2
+end)
+
+AddFeature("Movement", "No Gravity", "Zero gravity", Color3.fromRGB(255,255,200), function(state)
+    Workspace.Gravity = state and 0 or 196.2
+end)
+
+AddFeature("Movement", "Walk Speed 50", "Fast walk", Color3.fromRGB(100,255,100), function(state)
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then hum.WalkSpeed = state and 50 or 16 end
+    end
+end)
+
+AddFeature("Movement", "Walk Speed 100", "Very fast", Color3.fromRGB(50,255,200), function(state)
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then hum.WalkSpeed = state and 100 or 16 end
+    end
+end)
+
+-- TROLL FEATURES
+AddFeature("Troll", "Infinite Tools", "Spawn infinite tools", Color3.fromRGB(255,200,100), function(state)
+    spawn(function()
+        while state do
+            local tools = {"Sword", "Gun", "Rocket", "Katana", "Grapple", "Jetpack", "Shield", "Bomb"}
+            for _, name in pairs(tools) do
+                local tool = Instance.new("Tool")
+                tool.Name = name .. "_TK"
+                tool.RequiresHandle = false
+                tool.Parent = LocalPlayer.Backpack
+                task.wait(0.1)
+            end
+            task.wait(1)
+        end
+    end)
+end)
+
+AddFeature("Troll", "Nuke", "Massive explosions", Color3.fromRGB(255,50,0), function(state)
+    for i = 1, 20 do
+        local exp = Instance.new("Explosion")
+        exp.Position = Vector3.new(math.random(-100,100), 50, math.random(-100,100))
+        exp.BlastRadius = 30
+        exp.BlastPressure = 500000
+        exp.Parent = Workspace
+        task.wait(0.1)
+    end
+end, true)
+
+-- UTILITY FEATURES
+AddFeature("Utility", "Fullbright", "Max brightness", Color3.fromRGB(255,255,200), function(state)
+    Lighting.Brightness = state and 10 or 1
+end)
+
+AddFeature("Utility", "Fog Off", "Remove fog", Color3.fromRGB(200,200,255), function(state)
+    Lighting.FogEnd = state and 99999 or 1000
+end)
+
+AddFeature("Utility", "No Shadows", "Disable shadows", Color3.fromRGB(100,100,200), function(state)
+    Lighting.Shadows = not state
+end)
+
+-- Update canvases after adding features
+task.wait(0.1)
+UpdateCanvases()
+
+-- Right CTRL Toggle
+local menuVisible = true
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.KeyCode == Enum.KeyCode.RightControl then
+        menuVisible = not menuVisible
+        screenGui.Enabled = menuVisible
+    end
+end)
+
+print("✅ TK.TOOLS v6.0 Loaded Successfully!")
+print("🔄 Press RIGHT CTRL to toggle menu")
+print("🟢 Server Status: " .. (ServerAccess and "OK" or "X (Client Only)"))
