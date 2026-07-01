@@ -11,6 +11,40 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
 local Debris = game:GetService("Debris")
 
+-- Error Logging
+local function LogError(context, err)
+    warn("[TK.TOOLS ERROR] " .. context .. ": " .. tostring(err))
+end
+
+local function NotifyError(message)
+    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+    if not playerGui then return end
+
+    local notification = Instance.new("ScreenGui")
+    notification.Name = "TK_ErrorNotify"
+    notification.Parent = playerGui
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 350, 0, 40)
+    label.Position = UDim2.new(0.5, -175, 0, 10)
+    label.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+    label.BackgroundTransparency = 0.15
+    label.BorderSizePixel = 0
+    label.Text = "⚠ " .. message
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 13
+    label.Font = Enum.Font.GothamBold
+    label.TextWrapped = true
+    label.ZIndex = 1000
+    label.Parent = notification
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = label
+
+    Debris:AddItem(notification, 4)
+end
+
 -- Server Access Check
 local ServerAccess = false
 local RemoteEvent = nil
@@ -19,7 +53,7 @@ local function SetupRemote()
     local rs = ReplicatedStorage
     local remote = rs:FindFirstChild("TK_Remote")
     if not remote then
-        local success = pcall(function()
+        local success, err = pcall(function()
             local newRemote = Instance.new("RemoteEvent")
             newRemote.Name = "TK_Remote"
             newRemote.Parent = rs
@@ -27,8 +61,13 @@ local function SetupRemote()
             ServerAccess = true
         end)
         if not success then
+            LogError("SetupRemote", err)
             remote = rs:FindFirstChild("TK_Remote")
-            if remote then ServerAccess = true end
+            if remote then
+                ServerAccess = true
+            else
+                warn("[TK.TOOLS] Server access unavailable: " .. tostring(err))
+            end
         end
     else
         ServerAccess = true
@@ -43,12 +82,16 @@ if RunService:IsServer() and RemoteEvent then
     RemoteEvent.OnServerEvent:Connect(function(player, action, data)
         if action == "KickAll" then
             for _, plr in pairs(Players:GetPlayers()) do
-                if plr ~= player then pcall(function() plr:Kick("Kicked by TK.TOOLS") end) end
+                if plr ~= player then
+                    local ok, err = pcall(function() plr:Kick("Kicked by TK.TOOLS") end)
+                    if not ok then LogError("KickAll/" .. plr.Name, err) end
+                end
             end
         elseif action == "KillAll" then
             for _, plr in pairs(Players:GetPlayers()) do
                 if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                    pcall(function() plr.Character.Humanoid.Health = 0 end)
+                    local ok, err = pcall(function() plr.Character.Humanoid.Health = 0 end)
+                    if not ok then LogError("KillAll/" .. plr.Name, err) end
                 end
             end
         elseif action == "ExplodeAll" then
@@ -114,7 +157,12 @@ end
 -- Create GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "TK_Tools_GUI"
-screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+local playerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
+if not playerGui then
+    warn("[TK.TOOLS] Failed to find PlayerGui within 10 seconds. Aborting GUI creation.")
+    return
+end
+screenGui.Parent = playerGui
 screenGui.ResetOnSpawn = false
 screenGui.Enabled = true
 
@@ -388,7 +436,15 @@ local function AddFeature(tab, name, desc, color, callback, isDanger)
         FeatureStates[key] = state
         dot.BackgroundColor3 = state and Color3.fromRGB(0,255,100) or Color3.fromRGB(100,100,100)
         btn.BackgroundColor3 = state and Color3.fromRGB(80,80,120) or (color or Color3.fromRGB(50,50,70))
-        pcall(callback, state)
+        local ok, err = pcall(callback, state)
+        if not ok then
+            LogError(name, err)
+            NotifyError(name .. " failed: " .. tostring(err))
+            state = not state
+            FeatureStates[key] = state
+            dot.BackgroundColor3 = state and Color3.fromRGB(0,255,100) or Color3.fromRGB(100,100,100)
+            btn.BackgroundColor3 = state and Color3.fromRGB(80,80,120) or (color or Color3.fromRGB(50,50,70))
+        end
     end)
     
     btn.MouseEnter:Connect(function()
@@ -486,71 +542,93 @@ AddFeature("Client", "No Sway", "Remove sway", Color3.fromRGB(200,200,50), funct
 AddFeature("Client", "Instant Reload", "Fast reload", Color3.fromRGB(255,150,50), function(state) end)
 AddFeature("Client", "Unlimited Ammo", "Never run out", Color3.fromRGB(255,200,50), function(state) end)
 AddFeature("Client", "Rapid Fire", "Max fire rate", Color3.fromRGB(255,50,200), function(state) end)
+local flyBV = nil
+local flyConnection = nil
 AddFeature("Client", "Fly", "Free flight", Color3.fromRGB(100,200,255), function(state)
-    local bv = nil
     if state then
-        LocalPlayer.CharacterAdded:Connect(function(char)
-            if state then
-                local root = char:FindFirstChild("HumanoidRootPart")
-                if root then
-                    bv = Instance.new("BodyVelocity")
-                    bv.MaxForce = Vector3.new(1e6,1e6,1e6)
-                    bv.Parent = root
-                end
+        if flyConnection then flyConnection:Disconnect() end
+        flyConnection = LocalPlayer.CharacterAdded:Connect(function(char)
+            local root = char:WaitForChild("HumanoidRootPart", 5)
+            if root then
+                flyBV = Instance.new("BodyVelocity")
+                flyBV.MaxForce = Vector3.new(1e6,1e6,1e6)
+                flyBV.Parent = root
+            else
+                LogError("Fly", "HumanoidRootPart not found on respawn")
             end
         end)
         local char = LocalPlayer.Character
         if char then
             local root = char:FindFirstChild("HumanoidRootPart")
             if root then
-                bv = Instance.new("BodyVelocity")
-                bv.MaxForce = Vector3.new(1e6,1e6,1e6)
-                bv.Parent = root
+                flyBV = Instance.new("BodyVelocity")
+                flyBV.MaxForce = Vector3.new(1e6,1e6,1e6)
+                flyBV.Parent = root
+            else
+                NotifyError("Fly: No HumanoidRootPart found")
             end
+        else
+            NotifyError("Fly: No character found")
         end
     else
-        if bv then bv:Destroy() end
-        bv = nil
+        if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
+        if flyBV then pcall(function() flyBV:Destroy() end); flyBV = nil end
     end
 end)
 
 AddFeature("Client", "Noclip", "Walk through walls", Color3.fromRGB(200,100,255), function(state)
     local char = LocalPlayer.Character
-    if char then
-        for _, part in pairs(char:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = not state
-            end
+    if not char then
+        NotifyError("Noclip: No character found")
+        return
+    end
+    for _, part in pairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = not state
         end
     end
 end)
 
 AddFeature("Client", "Speed Boost", "2x movement speed", Color3.fromRGB(50,255,100), function(state)
     local char = LocalPlayer.Character
-    if char then
-        local hum = char:FindFirstChild("Humanoid")
-        if hum then hum.WalkSpeed = state and 32 or 16 end
+    if not char then
+        NotifyError("Speed Boost: No character found")
+        return
     end
+    local hum = char:FindFirstChild("Humanoid")
+    if not hum then
+        NotifyError("Speed Boost: No Humanoid found")
+        return
+    end
+    hum.WalkSpeed = state and 32 or 16
 end)
 
 AddFeature("Client", "Jump Boost", "Higher jumps", Color3.fromRGB(255,200,50), function(state)
     local char = LocalPlayer.Character
-    if char then
-        local hum = char:FindFirstChild("Humanoid")
-        if hum then hum.JumpPower = state and 100 or 50 end
+    if not char then
+        NotifyError("Jump Boost: No character found")
+        return
     end
+    local hum = char:FindFirstChild("Humanoid")
+    if not hum then
+        NotifyError("Jump Boost: No Humanoid found")
+        return
+    end
+    hum.JumpPower = state and 100 or 50
 end)
 
 AddFeature("Client", "Fling Self", "Launch yourself", Color3.fromRGB(255,200,50), function(state)
     local char = LocalPlayer.Character
-    if char and char:FindFirstChild("HumanoidRootPart") then
-        local root = char.HumanoidRootPart
-        local vel = Instance.new("BodyVelocity")
-        vel.Velocity = Vector3.new(math.random(-500,500), math.random(300,1000), math.random(-500,500))
-        vel.MaxForce = Vector3.new(1e9,1e9,1e9)
-        vel.Parent = root
-        Debris:AddItem(vel, 0.5)
+    if not char or not char:FindFirstChild("HumanoidRootPart") then
+        NotifyError("Fling Self: No character or root part found")
+        return
     end
+    local root = char.HumanoidRootPart
+    local vel = Instance.new("BodyVelocity")
+    vel.Velocity = Vector3.new(math.random(-500,500), math.random(300,1000), math.random(-500,500))
+    vel.MaxForce = Vector3.new(1e9,1e9,1e9)
+    vel.Parent = root
+    Debris:AddItem(vel, 0.5)
 end)
 
 AddFeature("Client", "Fling All", "Fling everyone (local)", Color3.fromRGB(255,150,50), function(state)
@@ -568,10 +646,18 @@ end)
 
 AddFeature("Client", "Chat Spam", "Flood chat", Color3.fromRGB(100,200,255), function(state)
     local msgs = {"TK.TOOLS OWNS THIS SERVER!", "GET REKT NOOBS!", "HAHAHAHAHA", "XENO BEST EXECUTOR", "LEET MODE ACTIVATED", "YOUR SERVER IS MINE", "BAN ME IF YOU CAN", "I AM THE MAINFRAME", "1337 H4X0R"}
+    local failures = 0
     for i = 1, 20 do
         local msg = msgs[math.random(#msgs)]
-        pcall(function() LocalPlayer.Chatted:Fire(msg) end)
+        local ok, err = pcall(function() LocalPlayer.Chatted:Fire(msg) end)
+        if not ok then
+            failures = failures + 1
+            LogError("Chat Spam", err)
+        end
         task.wait(0.08)
+    end
+    if failures > 0 then
+        NotifyError("Chat Spam: " .. failures .. "/20 messages failed")
     end
 end)
 
@@ -609,12 +695,17 @@ AddFeature("Client", "Spawn Parts", "Spawn parts on everyone", Color3.fromRGB(15
 end)
 
 AddFeature("Client", "Flashbang", "White screen flash", Color3.fromRGB(255,255,100), function(state)
+    local gui = LocalPlayer:FindFirstChild("PlayerGui")
+    if not gui then
+        NotifyError("Flashbang: PlayerGui not found")
+        return
+    end
     local flash = Instance.new("Frame")
     flash.Size = UDim2.new(1,0,1,0)
     flash.BackgroundColor3 = Color3.fromRGB(255,255,255)
     flash.BackgroundTransparency = 0
     flash.ZIndex = 999
-    flash.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    flash.Parent = gui
     TweenService:Create(flash, TweenInfo.new(0.3), {BackgroundTransparency = 0.4}):Play()
     task.wait(0.3)
     TweenService:Create(flash, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
@@ -649,9 +740,19 @@ end)
 
 AddFeature("Client", "Anti-AFK", "Prevent auto-kick", Color3.fromRGB(200,200,50), function(state)
     if state then
-        local vu = game:GetService("VirtualUser")
-        vu:CaptureController()
-        vu:ClickButton2(Vector2.new())
+        local ok, vu = pcall(function() return game:GetService("VirtualUser") end)
+        if not ok or not vu then
+            NotifyError("Anti-AFK: VirtualUser service unavailable")
+            return
+        end
+        local captureOk, captureErr = pcall(function()
+            vu:CaptureController()
+            vu:ClickButton2(Vector2.new())
+        end)
+        if not captureOk then
+            LogError("Anti-AFK", captureErr)
+            NotifyError("Anti-AFK failed: " .. tostring(captureErr))
+        end
     end
 end)
 
@@ -770,28 +871,34 @@ AddFeature("Server", "Reset Speed", "Normal speed for all", Color3.fromRGB(200,1
 end, true)
 
 AddFeature("Server", "Teleport All", "Bring everyone to you", Color3.fromRGB(50,200,200), function(state)
-    local pos = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if pos then
-        if RemoteEvent and ServerAccess then
-            RemoteEvent:FireServer("TeleportAll", pos.Position)
-        else
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                    plr.Character.HumanoidRootPart.CFrame = pos.CFrame + Vector3.new(math.random(-5,5), 0, math.random(-5,5))
-                end
+    local char = LocalPlayer.Character
+    local pos = char and char:FindFirstChild("HumanoidRootPart")
+    if not pos then
+        NotifyError("Teleport All: No character or root part found")
+        return
+    end
+    if RemoteEvent and ServerAccess then
+        RemoteEvent:FireServer("TeleportAll", pos.Position)
+    else
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                plr.Character.HumanoidRootPart.CFrame = pos.CFrame + Vector3.new(math.random(-5,5), 0, math.random(-5,5))
             end
         end
     end
 end, true)
 
 AddFeature("Server", "Explode Self", "Suicide bomb", Color3.fromRGB(255,80,80), function(state)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local exp = Instance.new("Explosion")
-        exp.Position = LocalPlayer.Character.HumanoidRootPart.Position
-        exp.BlastRadius = 40
-        exp.BlastPressure = 600000
-        exp.Parent = Workspace
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then
+        NotifyError("Explode Self: No character or root part found")
+        return
     end
+    local exp = Instance.new("Explosion")
+    exp.Position = char.HumanoidRootPart.Position
+    exp.BlastRadius = 40
+    exp.BlastPressure = 600000
+    exp.Parent = Workspace
 end, true)
 
 -- VISUALS FEATURES
@@ -807,26 +914,41 @@ AddFeature("Visuals", "No Shadows", "Disable shadows", Color3.fromRGB(100,100,20
     Lighting.Shadows = not state
 end)
 
+local rainbowActive = false
 AddFeature("Visuals", "Rainbow Parts", "Colorful everything", Color3.fromRGB(255,200,200), function(state)
-    spawn(function()
-        while state do
-            for _, v in pairs(Workspace:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.Color = Color3.fromHSV(tick() % 1, 1, 1)
+    rainbowActive = state
+    if state then
+        spawn(function()
+            while rainbowActive do
+                local ok, err = pcall(function()
+                    for _, v in pairs(Workspace:GetDescendants()) do
+                        if v:IsA("BasePart") then
+                            v.Color = Color3.fromHSV(tick() % 1, 1, 1)
+                        end
+                    end
+                end)
+                if not ok then
+                    LogError("Rainbow Parts", err)
                 end
+                task.wait(0.05)
             end
-            task.wait(0.05)
-        end
-    end)
+        end)
+    end
 end)
 
 -- MOVEMENT FEATURES
 AddFeature("Movement", "Super Jump", "Jump 10x higher", Color3.fromRGB(255,200,50), function(state)
     local char = LocalPlayer.Character
-    if char then
-        local hum = char:FindFirstChild("Humanoid")
-        if hum then hum.JumpPower = state and 500 or 50 end
+    if not char then
+        NotifyError("Super Jump: No character found")
+        return
     end
+    local hum = char:FindFirstChild("Humanoid")
+    if not hum then
+        NotifyError("Super Jump: No Humanoid found")
+        return
+    end
+    hum.JumpPower = state and 500 or 50
 end)
 
 AddFeature("Movement", "Moon Gravity", "Low gravity", Color3.fromRGB(200,200,255), function(state)
@@ -839,35 +961,55 @@ end)
 
 AddFeature("Movement", "Walk Speed 50", "Fast walk", Color3.fromRGB(100,255,100), function(state)
     local char = LocalPlayer.Character
-    if char then
-        local hum = char:FindFirstChild("Humanoid")
-        if hum then hum.WalkSpeed = state and 50 or 16 end
+    if not char then
+        NotifyError("Walk Speed 50: No character found")
+        return
     end
+    local hum = char:FindFirstChild("Humanoid")
+    if not hum then
+        NotifyError("Walk Speed 50: No Humanoid found")
+        return
+    end
+    hum.WalkSpeed = state and 50 or 16
 end)
 
 AddFeature("Movement", "Walk Speed 100", "Very fast", Color3.fromRGB(50,255,200), function(state)
     local char = LocalPlayer.Character
-    if char then
-        local hum = char:FindFirstChild("Humanoid")
-        if hum then hum.WalkSpeed = state and 100 or 16 end
+    if not char then
+        NotifyError("Walk Speed 100: No character found")
+        return
     end
+    local hum = char:FindFirstChild("Humanoid")
+    if not hum then
+        NotifyError("Walk Speed 100: No Humanoid found")
+        return
+    end
+    hum.WalkSpeed = state and 100 or 16
 end)
 
 -- TROLL FEATURES
+local infiniteToolsActive = false
 AddFeature("Troll", "Infinite Tools", "Spawn infinite tools", Color3.fromRGB(255,200,100), function(state)
-    spawn(function()
-        while state do
-            local tools = {"Sword", "Gun", "Rocket", "Katana", "Grapple", "Jetpack", "Shield", "Bomb"}
-            for _, name in pairs(tools) do
-                local tool = Instance.new("Tool")
-                tool.Name = name .. "_TK"
-                tool.RequiresHandle = false
-                tool.Parent = LocalPlayer.Backpack
-                task.wait(0.1)
+    infiniteToolsActive = state
+    if state then
+        spawn(function()
+            while infiniteToolsActive do
+                local tools = {"Sword", "Gun", "Rocket", "Katana", "Grapple", "Jetpack", "Shield", "Bomb"}
+                for _, name in pairs(tools) do
+                    if not infiniteToolsActive then break end
+                    local ok, err = pcall(function()
+                        local tool = Instance.new("Tool")
+                        tool.Name = name .. "_TK"
+                        tool.RequiresHandle = false
+                        tool.Parent = LocalPlayer.Backpack
+                    end)
+                    if not ok then LogError("Infinite Tools", err) end
+                    task.wait(0.1)
+                end
+                task.wait(1)
             end
-            task.wait(1)
-        end
-    end)
+        end)
+    end
 end)
 
 AddFeature("Troll", "Nuke", "Massive explosions", Color3.fromRGB(255,50,0), function(state)
