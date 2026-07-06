@@ -38,75 +38,119 @@ local function SetupRemote()
 end
 SetupRemote()
 
+-- ============================================
+--  SHARED UTILITIES
+-- ============================================
+
+local function GetHumanoid(player)
+    local char = player and player.Character
+    return char and char:FindFirstChild("Humanoid")
+end
+
+local function GetCharacterRoot(player)
+    local char = player and player.Character
+    return char and char:FindFirstChild("HumanoidRootPart")
+end
+
+local function ForEachPlayer(callback, excludePlayer)
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= excludePlayer then
+            callback(plr)
+        end
+    end
+end
+
+local function SetLocalHumanoidProp(propName, onValue, offValue)
+    return function(state)
+        local hum = GetHumanoid(LocalPlayer)
+        if hum then hum[propName] = state and onValue or offValue end
+    end
+end
+
+local function ApplyFling(rootPart, minVel, maxVel)
+    local vel = Instance.new("BodyVelocity")
+    vel.Velocity = Vector3.new(
+        math.random(minVel[1], maxVel[1]),
+        math.random(minVel[2], maxVel[2]),
+        math.random(minVel[3], maxVel[3])
+    )
+    vel.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+    vel.Parent = rootPart
+    Debris:AddItem(vel, 0.5)
+end
+
+local function CreateExplosion(position, radius, pressure)
+    local exp = Instance.new("Explosion")
+    exp.Position = position
+    exp.BlastRadius = radius or 30
+    exp.BlastPressure = pressure or 500000
+    exp.Parent = Workspace
+end
+
+local function SetCharacterAnchored(character, anchored)
+    if not character then return end
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then part.Anchored = anchored end
+    end
+end
+
+local function ServerAction(actionName, localFallback, data)
+    if RemoteEvent and ServerAccess then
+        RemoteEvent:FireServer(actionName, data)
+    else
+        localFallback()
+    end
+end
+
+local function SetAllHumanoidProp(propName, value)
+    ForEachPlayer(function(plr)
+        local hum = GetHumanoid(plr)
+        if hum then hum[propName] = value end
+    end)
+end
+
 -- Server Handler
 if RunService:IsServer() and RemoteEvent then
     RemoteEvent.OnServerEvent:Connect(function(player, action, data)
         if action == "KickAll" then
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr ~= player then pcall(function() plr:Kick("Kicked by TK.TOOLS") end) end
-            end
+            ForEachPlayer(function(plr)
+                pcall(function() plr:Kick("Kicked by TK.TOOLS") end)
+            end, player)
         elseif action == "KillAll" then
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                    pcall(function() plr.Character.Humanoid.Health = 0 end)
-                end
-            end
+            ForEachPlayer(function(plr)
+                local hum = GetHumanoid(plr)
+                if hum then pcall(function() hum.Health = 0 end) end
+            end)
         elseif action == "ExplodeAll" then
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                    local exp = Instance.new("Explosion")
-                    exp.Position = plr.Character.HumanoidRootPart.Position
-                    exp.BlastRadius = 30
-                    exp.BlastPressure = 500000
-                    exp.Parent = Workspace
-                end
-            end
+            ForEachPlayer(function(plr)
+                local root = GetCharacterRoot(plr)
+                if root then CreateExplosion(root.Position, 30, 500000) end
+            end)
         elseif action == "FreezeAll" then
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr.Character then
-                    for _, part in pairs(plr.Character:GetDescendants()) do
-                        if part:IsA("BasePart") then part.Anchored = true end
-                    end
-                end
-            end
+            ForEachPlayer(function(plr)
+                SetCharacterAnchored(plr.Character, true)
+            end)
         elseif action == "UnfreezeAll" then
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr.Character then
-                    for _, part in pairs(plr.Character:GetDescendants()) do
-                        if part:IsA("BasePart") then part.Anchored = false end
-                    end
-                end
-            end
+            ForEachPlayer(function(plr)
+                SetCharacterAnchored(plr.Character, false)
+            end)
         elseif action == "FlingAll" then
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                    local root = plr.Character.HumanoidRootPart
-                    local vel = Instance.new("BodyVelocity")
-                    vel.Velocity = Vector3.new(math.random(-1000,1000), math.random(500,1500), math.random(-1000,1000))
-                    vel.MaxForce = Vector3.new(1e9,1e9,1e9)
-                    vel.Parent = root
-                    Debris:AddItem(vel, 0.5)
-                end
-            end
+            ForEachPlayer(function(plr)
+                local root = GetCharacterRoot(plr)
+                if root then ApplyFling(root, {-1000, 500, -1000}, {1000, 1500, 1000}) end
+            end, player)
         elseif action == "SuperSpeed" then
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                    plr.Character.Humanoid.WalkSpeed = 100
-                end
-            end
+            SetAllHumanoidProp("WalkSpeed", 100)
         elseif action == "ResetSpeed" then
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                    plr.Character.Humanoid.WalkSpeed = 16
-                end
-            end
+            SetAllHumanoidProp("WalkSpeed", 16)
         elseif action == "TeleportAll" then
-            local targetPos = data or Vector3.new(0,100,0)
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                    plr.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos + Vector3.new(math.random(-5,5),0,math.random(-5,5)))
+            local targetPos = data or Vector3.new(0, 100, 0)
+            ForEachPlayer(function(plr)
+                local root = GetCharacterRoot(plr)
+                if root then
+                    root.CFrame = CFrame.new(targetPos + Vector3.new(math.random(-5, 5), 0, math.random(-5, 5)))
                 end
-            end
+            end, player)
         end
     end)
 end
@@ -443,8 +487,8 @@ end
 -- CLIENT FEATURES
 AddFeature("Client", "ESP Boxes", "Draw boxes around players", Color3.fromRGB(0,150,255), function(state)
     if state then
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character then
+        ForEachPlayer(function(plr)
+            if plr.Character then
                 local hl = Instance.new("Highlight")
                 hl.Name = "TK_ESP"
                 hl.Adornee = plr.Character
@@ -454,7 +498,7 @@ AddFeature("Client", "ESP Boxes", "Draw boxes around players", Color3.fromRGB(0,
                 hl.OutlineTransparency = 0.2
                 hl.Parent = plr.Character
             end
-        end
+        end, LocalPlayer)
     else
         for _, v in pairs(Workspace:GetDescendants()) do
             if v.Name == "TK_ESP" then v:Destroy() end
@@ -525,45 +569,20 @@ AddFeature("Client", "Noclip", "Walk through walls", Color3.fromRGB(200,100,255)
     end
 end)
 
-AddFeature("Client", "Speed Boost", "2x movement speed", Color3.fromRGB(50,255,100), function(state)
-    local char = LocalPlayer.Character
-    if char then
-        local hum = char:FindFirstChild("Humanoid")
-        if hum then hum.WalkSpeed = state and 32 or 16 end
-    end
-end)
+AddFeature("Client", "Speed Boost", "2x movement speed", Color3.fromRGB(50,255,100), SetLocalHumanoidProp("WalkSpeed", 32, 16))
 
-AddFeature("Client", "Jump Boost", "Higher jumps", Color3.fromRGB(255,200,50), function(state)
-    local char = LocalPlayer.Character
-    if char then
-        local hum = char:FindFirstChild("Humanoid")
-        if hum then hum.JumpPower = state and 100 or 50 end
-    end
-end)
+AddFeature("Client", "Jump Boost", "Higher jumps", Color3.fromRGB(255,200,50), SetLocalHumanoidProp("JumpPower", 100, 50))
 
 AddFeature("Client", "Fling Self", "Launch yourself", Color3.fromRGB(255,200,50), function(state)
-    local char = LocalPlayer.Character
-    if char and char:FindFirstChild("HumanoidRootPart") then
-        local root = char.HumanoidRootPart
-        local vel = Instance.new("BodyVelocity")
-        vel.Velocity = Vector3.new(math.random(-500,500), math.random(300,1000), math.random(-500,500))
-        vel.MaxForce = Vector3.new(1e9,1e9,1e9)
-        vel.Parent = root
-        Debris:AddItem(vel, 0.5)
-    end
+    local root = GetCharacterRoot(LocalPlayer)
+    if root then ApplyFling(root, {-500, 300, -500}, {500, 1000, 500}) end
 end)
 
 AddFeature("Client", "Fling All", "Fling everyone (local)", Color3.fromRGB(255,150,50), function(state)
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local root = plr.Character.HumanoidRootPart
-            local vel = Instance.new("BodyVelocity")
-            vel.Velocity = Vector3.new(math.random(-800,800), math.random(300,1200), math.random(-800,800))
-            vel.MaxForce = Vector3.new(1e9,1e9,1e9)
-            vel.Parent = root
-            Debris:AddItem(vel, 0.5)
-        end
-    end
+    ForEachPlayer(function(plr)
+        local root = GetCharacterRoot(plr)
+        if root then ApplyFling(root, {-800, 300, -800}, {800, 1200, 800}) end
+    end)
 end)
 
 AddFeature("Client", "Chat Spam", "Flood chat", Color3.fromRGB(100,200,255), function(state)
@@ -590,9 +609,10 @@ AddFeature("Client", "Sound Spam", "Play annoying sounds", Color3.fromRGB(200,50
 end)
 
 AddFeature("Client", "Spawn Parts", "Spawn parts on everyone", Color3.fromRGB(150,100,200), function(state)
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local pos = plr.Character.HumanoidRootPart.Position
+    ForEachPlayer(function(plr)
+        local root = GetCharacterRoot(plr)
+        if root then
+            local pos = root.Position
             for i = 1, 8 do
                 local part = Instance.new("Part")
                 part.Size = Vector3.new(2,2,2)
@@ -605,7 +625,7 @@ AddFeature("Client", "Spawn Parts", "Spawn parts on everyone", Color3.fromRGB(15
                 Debris:AddItem(part, 4)
             end
         end
-    end
+    end)
 end)
 
 AddFeature("Client", "Flashbang", "White screen flash", Color3.fromRGB(255,255,100), function(state)
@@ -661,137 +681,85 @@ end)
 
 -- SERVER FEATURES
 AddFeature("Server", "Kick All", "Kick every player", Color3.fromRGB(200,40,40), function(state)
-    if RemoteEvent and ServerAccess then
-        RemoteEvent:FireServer("KickAll")
-    else
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer then
-                pcall(function() plr:Kick("Kicked by TK.TOOLS") end)
-            end
-        end
-    end
+    ServerAction("KickAll", function()
+        ForEachPlayer(function(plr)
+            pcall(function() plr:Kick("Kicked by TK.TOOLS") end)
+        end, LocalPlayer)
+    end)
 end, true)
 
 AddFeature("Server", "Kill All", "Kill every player", Color3.fromRGB(200,20,20), function(state)
-    if RemoteEvent and ServerAccess then
-        RemoteEvent:FireServer("KillAll")
-    else
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                pcall(function() plr.Character.Humanoid.Health = 0 end)
-            end
-        end
-    end
+    ServerAction("KillAll", function()
+        ForEachPlayer(function(plr)
+            local hum = GetHumanoid(plr)
+            if hum then pcall(function() hum.Health = 0 end) end
+        end)
+    end)
 end, true)
 
 AddFeature("Server", "Explode All", "Explode everyone", Color3.fromRGB(255,150,0), function(state)
-    if RemoteEvent and ServerAccess then
-        RemoteEvent:FireServer("ExplodeAll")
-    else
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                local exp = Instance.new("Explosion")
-                exp.Position = plr.Character.HumanoidRootPart.Position
-                exp.BlastRadius = 25
-                exp.BlastPressure = 300000
-                exp.Parent = Workspace
-            end
-        end
-    end
+    ServerAction("ExplodeAll", function()
+        ForEachPlayer(function(plr)
+            local root = GetCharacterRoot(plr)
+            if root then CreateExplosion(root.Position, 25, 300000) end
+        end)
+    end)
 end, true)
 
 AddFeature("Server", "Freeze All", "Freeze everyone", Color3.fromRGB(50,150,255), function(state)
-    if RemoteEvent and ServerAccess then
-        RemoteEvent:FireServer("FreezeAll")
-    else
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr.Character then
-                for _, part in pairs(plr.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then part.Anchored = true end
-                end
-            end
-        end
-    end
+    ServerAction("FreezeAll", function()
+        ForEachPlayer(function(plr)
+            SetCharacterAnchored(plr.Character, true)
+        end)
+    end)
 end, true)
 
 AddFeature("Server", "Unfreeze All", "Unfreeze everyone", Color3.fromRGB(100,200,100), function(state)
-    if RemoteEvent and ServerAccess then
-        RemoteEvent:FireServer("UnfreezeAll")
-    else
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr.Character then
-                for _, part in pairs(plr.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then part.Anchored = false end
-                end
-            end
-        end
-    end
+    ServerAction("UnfreezeAll", function()
+        ForEachPlayer(function(plr)
+            SetCharacterAnchored(plr.Character, false)
+        end)
+    end)
 end, true)
 
 AddFeature("Server", "Fling All", "Launch everyone", Color3.fromRGB(255,100,200), function(state)
-    if RemoteEvent and ServerAccess then
-        RemoteEvent:FireServer("FlingAll")
-    else
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                local root = plr.Character.HumanoidRootPart
-                local vel = Instance.new("BodyVelocity")
-                vel.Velocity = Vector3.new(math.random(-1000,1000), math.random(500,1500), math.random(-1000,1000))
-                vel.MaxForce = Vector3.new(1e9,1e9,1e9)
-                vel.Parent = root
-                Debris:AddItem(vel, 0.5)
-            end
-        end
-    end
+    ServerAction("FlingAll", function()
+        ForEachPlayer(function(plr)
+            local root = GetCharacterRoot(plr)
+            if root then ApplyFling(root, {-1000, 500, -1000}, {1000, 1500, 1000}) end
+        end)
+    end)
 end, true)
 
 AddFeature("Server", "Super Speed", "Max speed for all", Color3.fromRGB(50,255,100), function(state)
-    if RemoteEvent and ServerAccess then
-        RemoteEvent:FireServer("SuperSpeed")
-    else
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                plr.Character.Humanoid.WalkSpeed = 100
-            end
-        end
-    end
+    ServerAction("SuperSpeed", function()
+        SetAllHumanoidProp("WalkSpeed", 100)
+    end)
 end, true)
 
 AddFeature("Server", "Reset Speed", "Normal speed for all", Color3.fromRGB(200,150,50), function(state)
-    if RemoteEvent and ServerAccess then
-        RemoteEvent:FireServer("ResetSpeed")
-    else
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                plr.Character.Humanoid.WalkSpeed = 16
-            end
-        end
-    end
+    ServerAction("ResetSpeed", function()
+        SetAllHumanoidProp("WalkSpeed", 16)
+    end)
 end, true)
 
 AddFeature("Server", "Teleport All", "Bring everyone to you", Color3.fromRGB(50,200,200), function(state)
-    local pos = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if pos then
-        if RemoteEvent and ServerAccess then
-            RemoteEvent:FireServer("TeleportAll", pos.Position)
-        else
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                    plr.Character.HumanoidRootPart.CFrame = pos.CFrame + Vector3.new(math.random(-5,5), 0, math.random(-5,5))
+    local root = GetCharacterRoot(LocalPlayer)
+    if root then
+        ServerAction("TeleportAll", function()
+            ForEachPlayer(function(plr)
+                local plrRoot = GetCharacterRoot(plr)
+                if plrRoot then
+                    plrRoot.CFrame = root.CFrame + Vector3.new(math.random(-5, 5), 0, math.random(-5, 5))
                 end
-            end
-        end
+            end, LocalPlayer)
+        end, root.Position)
     end
 end, true)
 
 AddFeature("Server", "Explode Self", "Suicide bomb", Color3.fromRGB(255,80,80), function(state)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local exp = Instance.new("Explosion")
-        exp.Position = LocalPlayer.Character.HumanoidRootPart.Position
-        exp.BlastRadius = 40
-        exp.BlastPressure = 600000
-        exp.Parent = Workspace
-    end
+    local root = GetCharacterRoot(LocalPlayer)
+    if root then CreateExplosion(root.Position, 40, 600000) end
 end, true)
 
 -- VISUALS FEATURES
@@ -821,13 +789,7 @@ AddFeature("Visuals", "Rainbow Parts", "Colorful everything", Color3.fromRGB(255
 end)
 
 -- MOVEMENT FEATURES
-AddFeature("Movement", "Super Jump", "Jump 10x higher", Color3.fromRGB(255,200,50), function(state)
-    local char = LocalPlayer.Character
-    if char then
-        local hum = char:FindFirstChild("Humanoid")
-        if hum then hum.JumpPower = state and 500 or 50 end
-    end
-end)
+AddFeature("Movement", "Super Jump", "Jump 10x higher", Color3.fromRGB(255,200,50), SetLocalHumanoidProp("JumpPower", 500, 50))
 
 AddFeature("Movement", "Moon Gravity", "Low gravity", Color3.fromRGB(200,200,255), function(state)
     Workspace.Gravity = state and 50 or 196.2
@@ -837,21 +799,9 @@ AddFeature("Movement", "No Gravity", "Zero gravity", Color3.fromRGB(255,255,200)
     Workspace.Gravity = state and 0 or 196.2
 end)
 
-AddFeature("Movement", "Walk Speed 50", "Fast walk", Color3.fromRGB(100,255,100), function(state)
-    local char = LocalPlayer.Character
-    if char then
-        local hum = char:FindFirstChild("Humanoid")
-        if hum then hum.WalkSpeed = state and 50 or 16 end
-    end
-end)
+AddFeature("Movement", "Walk Speed 50", "Fast walk", Color3.fromRGB(100,255,100), SetLocalHumanoidProp("WalkSpeed", 50, 16))
 
-AddFeature("Movement", "Walk Speed 100", "Very fast", Color3.fromRGB(50,255,200), function(state)
-    local char = LocalPlayer.Character
-    if char then
-        local hum = char:FindFirstChild("Humanoid")
-        if hum then hum.WalkSpeed = state and 100 or 16 end
-    end
-end)
+AddFeature("Movement", "Walk Speed 100", "Very fast", Color3.fromRGB(50,255,200), SetLocalHumanoidProp("WalkSpeed", 100, 16))
 
 -- TROLL FEATURES
 AddFeature("Troll", "Infinite Tools", "Spawn infinite tools", Color3.fromRGB(255,200,100), function(state)
@@ -872,27 +822,10 @@ end)
 
 AddFeature("Troll", "Nuke", "Massive explosions", Color3.fromRGB(255,50,0), function(state)
     for i = 1, 20 do
-        local exp = Instance.new("Explosion")
-        exp.Position = Vector3.new(math.random(-100,100), 50, math.random(-100,100))
-        exp.BlastRadius = 30
-        exp.BlastPressure = 500000
-        exp.Parent = Workspace
+        CreateExplosion(Vector3.new(math.random(-100,100), 50, math.random(-100,100)), 30, 500000)
         task.wait(0.1)
     end
 end, true)
-
--- UTILITY FEATURES
-AddFeature("Utility", "Fullbright", "Max brightness", Color3.fromRGB(255,255,200), function(state)
-    Lighting.Brightness = state and 10 or 1
-end)
-
-AddFeature("Utility", "Fog Off", "Remove fog", Color3.fromRGB(200,200,255), function(state)
-    Lighting.FogEnd = state and 99999 or 1000
-end)
-
-AddFeature("Utility", "No Shadows", "Disable shadows", Color3.fromRGB(100,100,200), function(state)
-    Lighting.Shadows = not state
-end)
 
 -- Update canvases after adding features
 task.wait(0.1)
