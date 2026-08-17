@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Discord Username Finder — 3 &amp; 4 character names</title>
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<header class="top">
+  <h1>Discord Username Finder</h1>
+  <p class="sub">Generates 3–4 character usernames, verifies each one against Discord, and only shows the ones that are actually available.</p>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>1. What to generate</h2>
+
+    <div class="row">
+      <label>Length
+        <select id="length">
+          <option value="3">3 characters</option>
+          <option value="4" selected>4 characters</option>
+        </select>
+      </label>
+
+      <label>Character set
+        <select id="charset">
+          <option value="letters" selected>Letters only (a–z)</option>
+          <option value="numbers">Numbers only (0–9)</option>
+          <option value="alnum">Letters + numbers</option>
+          <option value="alnum_symbols">Letters + numbers + . and _</option>
+          <option value="custom">Custom characters…</option>
+        </select>
+      </label>
+
+      <label>Custom characters
+        <input id="customChars" type="text" placeholder="e.g. aeiou13" disabled />
+      </label>
+    </div>
+
+    <div class="row">
+      <label>Pattern (optional)
+        <input id="pattern" type="text" placeholder="e.g. L?N? — L=letter N=number ?=any" />
+      </label>
+
+      <label>Mode
+        <select id="mode">
+          <option value="random" selected>Random candidates</option>
+          <option value="sequential">Every combination in order</option>
+        </select>
+      </label>
+
+      <label>How many to check
+        <input id="count" type="number" min="1" max="20000" value="200" />
+      </label>
+    </div>
+
+    <details class="advanced">
+      <summary>Advanced</summary>
+      <div class="row">
+        <label>Requests at a time
+          <input id="concurrency" type="number" min="1" max="10" value="3" />
+        </label>
+        <label>Delay between requests (ms)
+          <input id="delay" type="number" min="0" max="10000" value="350" />
+        </label>
+        <label>Checker API URL
+          <input id="apiUrl" type="text" placeholder="https://your-worker.workers.dev/check" />
+        </label>
+      </div>
+      <p class="hint">
+        The API URL is a small proxy you deploy once (see the repo's <code>worker/</code> or
+        <code>api/</code> folder). Browsers cannot call Discord directly because of CORS.
+        Keep the delay at 300 ms or higher to avoid being rate limited.
+      </p>
+      <div class="row">
+        <label class="check"><input id="noRepeat" type="checkbox" /> No repeated characters</label>
+        <label class="check"><input id="noLeadingDigit" type="checkbox" checked /> Don't start with a number</label>
+        <label class="check"><input id="skipSeen" type="checkbox" checked /> Skip names already checked this session</label>
+      </div>
+    </details>
+
+    <div class="actions">
+      <button id="start" class="primary">Start checking</button>
+      <button id="stop" class="ghost" disabled>Stop</button>
+      <button id="clear" class="ghost">Clear results</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>2. Progress</h2>
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="stats">
+      <span>Checked: <b id="statChecked">0</b></span>
+      <span>Available: <b id="statAvailable">0</b></span>
+      <span>Taken: <b id="statTaken">0</b></span>
+      <span>Errors: <b id="statErrors">0</b></span>
+      <span id="statState" class="state">Idle</span>
+    </div>
+    <p id="message" class="message" hidden></p>
+  </section>
+
+  <section class="panel">
+    <h2>3. Available usernames <span class="muted">(verified free)</span></h2>
+    <div class="actions">
+      <button id="copyAll" class="ghost">Copy all</button>
+      <button id="download" class="ghost">Download .txt</button>
+    </div>
+    <ul id="results" class="results" aria-live="polite"></ul>
+    <p id="empty" class="muted">Nothing yet — results only appear after Discord confirms a name is free.</p>
+  </section>
+
+  <p class="footnote">
+    This tool only checks availability. Claiming a username is done by you, manually, in Discord's
+    settings — automating account changes breaks Discord's Terms of Service.
+  </p>
+</main>
+
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

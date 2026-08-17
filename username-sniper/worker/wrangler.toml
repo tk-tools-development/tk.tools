@@ -1,0 +1,7 @@
+name = "discord-username-check"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# Optional: lock the proxy to your GitHub Pages origin instead of allowing every site.
+# [vars]
+# ALLOWED_ORIGIN = "https://tk-tools-development.github.io"
